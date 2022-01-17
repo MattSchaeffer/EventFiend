@@ -6,9 +6,9 @@
  to be redesigning it.  It's still pretty useful though even in it's current state
  and it's  under active development
 
- There are two files.  One contains most of the code that does work, and the design form that has most of 
- the GUI and form parts.  These will likely be combined at some point, but not until the redesign and I 
- see how much I've been able to shrink the code.  Despite being in early/mid development, it's safe
+ There are two files.  One contains most of the code that does work and that you execute, and the design form 
+ that has most of  the GUI and form parts.  These will likely be combined at some point, but not until the redesign 
+ and I  see how much I've been able to shrink the code.  Despite being in early/mid development, it's safe
  to run and doesn't make changes or make any writes to the system beyond writing a save file when requested.
 
  Also, the EventViewerGUI files are the current (yet already I'm considering them old) version before I 
