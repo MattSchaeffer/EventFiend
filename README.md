@@ -15,14 +15,6 @@
 
  EventClass.json Just a copy of the existing menu that I exported.  Not needed or important.
 
- There are two files.  One contains most of the code that does work and that you execute, and the design form 
- that has most of  the GUI and form parts.  These will likely be combined at some point, but not until the redesign 
- and I  see how much I've been able to shrink the code.  Despite being in early/mid development, it's safe
- to run and doesn't make changes or make any writes to the system beyond writing a save file when requested.
-
- Also, the EventViewerGUI files are the current (yet already I'm considering them old) version before I 
- rewrite it. The future files that I should have in here within the week will be named EventFiend and they 
- will be the newer rewritten code.  And if you are interested in contributing, drop me a line
 
  What it does:
  Filters through the event viewer and takes a lot of the work out of finding what's important.  It:
@@ -38,13 +30,3 @@
 	specific categories (like Network, Firewall, SQL Server, Active Directory, etc), where it searches for 
 	specific event ids that indicate problems for that particular application.
 5) (working) Allows you to save the resulting datasets to .txt or .csv files
-
-Basic To Do List: (will be dumped into the proper places in Github when I get some time)
-1) Turn the entire existing event menu section into generated code that will be created by a .JSON file
-	This will allow the script to be improved on and makes it more customizable
-2) write the code to connect to a remote host.  The GUI is there, that's just been low on the list.  I
-	need to get everything working locally first.
-3) Write the Events of Interest section that I currently have space for, but don't have populating with
-	Anything.
-4) Write the save/load settings part.  That will be tied into the .JSON menu rebuild and will allow any 
-	changes you make in the menu to be saved
