@@ -1,4 +1,5 @@
 
+
 <#
         .DESCRIPTION
             Grabs events from Windows Event viewer and organizes them into lists of unique events and number of times event occurred to make troubleshooting easier.
@@ -63,15 +64,19 @@
 ## Variables and classes
 ##########################################
 
-$script:EventsList = @()
-$script:SortedEventsDatatable = New-Object System.Data.DataTable
-$script:CheckValues = 2,3
-$script:Levels = @('Placeholder-0','Critical','Error', 'Warning', 'Information', 'Verbose')
-$script:EventFilter = @{Logname='System','Application'
-                 Level=2,3
-                 StartTime= (get-date).AddDays(-1)
-                 EndTime= (get-date)
-                 }
+$script:EventsList = @()					#The master list of the events collected before filtering
+$script:SortedEventsDatatable = New-Object System.Data.DataTable     # The master list after being filtered to unique IDs or Messages
+# todo remove this line if not needed : $script:CheckValues = 2,3
+$Levels = @('Placeholder-0','Critical','Error', 'Warning', 'Information', 'Verbose')   #Used to convert the level number to the expected word value
+[System.Collections.ArrayList]$EventFilters = @()
+[hashtable]$EventFilter = @{Logname='System','Application'               # The event filter used to get the event logs
+	Level=2,3
+	StartTime= (get-date).AddDays(-1)
+	EndTime= (get-date)
+}
+$Eventfilters += $EventFilter
+$EventClassControlArray = @()												# An array containing all menu items under "Event Classes" used to loop through controls for import/export/etc
+
 
 
 ##########################################
@@ -89,31 +94,10 @@ $btnGetEvents_click = {
 }
 
 $btnConnectRemote_click = {
-	
+	write-host "To be created"
 }
 
-$chkbxSelectTD_checkedchanged = {
 
-	$CurrentSize = $dgvEvents.size
-
-	if ($chkbxSelectTD.Checked -eq $true)
-	{
-		$dgvEvents.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]4,[System.Int32]63))
-		$dgvEvents.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]($currentsize.Width),[System.Int32]($currentsize.Height-31)))
-		$lblEvents.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]4,[System.Int32]38))
-		$dtpkEndDate.Visible = $true
-		$dtpkEndTime.Visible = $true
-	}
-	elseif ($chkbxSelectTD.Checked -eq $false){
-		$dgvEvents.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]4,[System.Int32]32))
-		$dgvEvents.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]($currentsize.Width),[System.Int32]($currentsize.Height+31)))
-		$lblEvents.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]4,[System.Int32]4))
-		$dtpkEndDate.Visible = $false
-		$dtpkEndTime.Visible = $false
-	
-	}
-	
-}
 
 $dgvEvents_CellClick = {
 	$txtEventMessages.Text = $dgvEvents.SelectedRows.cells[6].value
@@ -142,115 +126,61 @@ $form_load = {
 	$dtpkEndTime.Value  = [datetime]::Now
 
 	# Load Controls into an array
-	$script:mnuEventsAccountIds = ($mnuEventsAccountIds0,$mnuEventsAccountIds1,$mnuEventsAccountIds2,$mnuEventsAccountIds3,$mnuEventsAccountIds4)
-	$script:mnuEventsAppsIds = ($mnuEventsAppsIds0,$mnuEventsAppsIds1)
+	$script:mnuEventClassesAppsIds = ($mnuEventClassesAppsIds0,$mnuEventClassesAppsIds1)
 }
 
 
 
-$mnuEventsAccount_click = {
+
+
+$mnuEventClassesAD_click = {
 
 }
 
-$mnuEventsAD_click = {
-
-}
-
-$mnuEventsApps_click = {
-
-	#close the dropdown so it isn't in the way
-	$mnuevents.HideDropDown()
-
-	[System.Collections.ArrayList]$EventFilter = @()
-	#Define what Logs are in use and number them for retrieval from menu tag
-	[hashtable]$EventLogList = @{}
-
-	$EventLogList.Add('1','Application') 
+$mnuEventClassesApps_click = {
 	
-	#get a list of Event IDs
-	foreach	($MenuItem in $mnuEventsAppsIds)
-	{
-		# Use a split in case there are multiple logs that needs to be loaded.
-		$AppLogGroup = $menuitem.tag.split("|")
-		foreach	($group in $AppLogGroup)
-		{
-			# Split the app number from the event IDs and takes the resultiing number and feeds it into the hashtable to get the log name
-			$EventLog = $EventLogList[$(($group.split(":"))[0])]
-			# Takes the second half of the .tag and splits it by commas to get each individual event id
-			$EventIDs = $(($group.split(":"))[1]).split(",")
-
-			# Now we toss them into our array for temporary storage
-			foreach ($event in $eventids)
-			{
-				$EventLogList += [PSCustomObject]@{
-					EventLog = $EventLog
-					$EventID = $event
-				}
-			}
-		}
-	}
-
-	#now that we've got our complete list, we need to split them up by event log and create an eventfilter for each
-	foreach ($Log in ($EventLogList | sort-object -Property EventLog -unique).EventLog)
-	{
-		# Get all the eventids for this log
-		$EventIDs = ($EventLogList | where-object -Property EventLog -eq $log).Event
-
-		# Create a hashfilter and add it to the array
-		$script:EventFilter += @{Logname= $Log
-			Id = $EventIDs
-			StartTime= Get-DatetimeCheck 'Start'
-			EndTime= Get-DatetimeCheck 'End'
-		}
-	}
-
-	# All that work just to create the filters, now we get the events
-	Get-EventsList
-
-	#Then get them sorted
-	$SortedEvents = Group-EventsUnique
-
-	#then display them in the datagridview
-	Update-DataTable $SortedEvents
+	#close the dropdown so it isn't in the way
+	$mnuEventClasses.HideDropDown()
+	Get-EventClassList $mnueventclassesapps
 }
 
-$mnuEventsAppsIds0_click = {
+$mnuEventClassesAppsIds0_click = {
 
-	if ($mnuEventsAppsIds0.Checked -eq $true)
+	if ($mnuEventClassesAppsIds0.Checked -eq $true)
 	{
-		$mnuEventsAppsIds0.Checked = $false
+		$mnuEventClassesAppsIds0.Checked = $false
 	}
 	else {
-		$mnuEventsAppsIds0.Checked = $true
+		$mnuEventClassesAppsIds0.Checked = $true
 	}
 }
 
-$mnuEventsAppsIds1_click = {
-	if ($mnuEventsAppsIds1.Checked -eq $true)
+$mnuEventClassesAppsIds1_click = {
+	if ($mnuEventClassesAppsIds1.Checked -eq $true)
 	{
-		$mnuEventsAppsIds1.Checked = $false
+		$mnuEventClassesAppsIds1.Checked = $false
 	}
 	else {
-		$mnuEventsAppsIds1.Checked = $true
+		$mnuEventClassesAppsIds1.Checked = $true
 	}
 }
 
-$mnuEventsAuthentication_click = {
+$mnuEventClassesAuthentication_click = {
 }
 
-$mnuEventsNetwork_click = {
-
-}
-
-$mnuEventsRDS_click = {
+$mnuEventClassesNetwork_click = {
 
 }
 
-$mnuEventsServices_click = {
+$mnuEventClassesRDS_click = {
 
 }
 
-$mnuEventsSQL_click = {
+$mnuEventClassesServices_click = {
+
+}
+
+$mnuEventClassesSQL_click = {
 
 }
 
@@ -259,11 +189,11 @@ $mnuWindowsUpdates_click = {
 
 }
 
-$mnuEventsWindowsFirewall_click = {
+$mnuEventClassesWindowsFirewall_click = {
 
 }
 
-$mnuEventsCrashes_click = {
+$mnuEventClassesCrashes_click = {
 
 }
 
@@ -291,12 +221,56 @@ $mnuFileExport_click = {
 	}
 }
 
+$mnuFileLoad_click = {
+
+	#Create load file dialog box and prompt user for save file
+	$OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+	$OpenFileDialog.initialDirectory = $PSScriptRoot
+	$OpenFileDialog.filter = "XML (*.xml)| *.xml|JSON (*.json)|*.json"
+	$OpenFileDialog.ShowDialog() |  Out-Null
+	$SaveFile = $OpenFileDialog.filename
+	
+	# Check if .JSON or .xml and import appropriately
+	if ($savefile -match ".xml")
+	{
+		$MenuObject = Import-Clixml -Path $Savefile
+	}
+	elseif ($savefile -match ".json")
+	{
+		
+	}
+
+	Import-Menu $MenuObject
+	
+}
+
 $mnuFileOverwrite_click = {
 	$mnuFileOverwrite.checked = $true
 	$MnuFileAppend.checked = $false
 }
 
 $mnuFileSaveSettings_click = {
+
+	$MenuSettings = get-MenuEvents
+
+	$OpenFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+	$OpenFileDialog.initialDirectory = $PSScriptRoot
+	$OpenFileDialog.filter = "JSON (*.JSON)| *.JSON|XML (*.xml)|*.xml"
+	$openfiledialog.ShowHelp
+	$OpenFileDialog.ShowDialog() |  Out-Null
+	$SaveFile = $OpenFileDialog.filename
+	
+	if ($savefile -match "json")
+	{
+		$MenuJSON = ConvertTo-Json -InputObject $MenuSettings -depth 3 
+		$MenuJSON > $savefile
+		[System.Windows.forms.MessageBox]::Show("JSON File has been exported")
+	}
+	elseif ($savefile -match "xml")
+	{
+		$MenuSettings | export-clixml $savefile -Depth 4
+		[System.Windows.forms.MessageBox]::Show("XML File has been exported")
+	}
 }
 
 $mnuHelpHelp_click = {
@@ -345,18 +319,18 @@ function write-stupidstuff{
 	$dgvEventsHeader_click
 	$dgvEventsHeader_doubleclick
 	$form_load
-	$mnuEventsAccount_click
-	$mnuEventsAD_click
-	$mnuEventsApps_click
-	$mnuEventsAppsIds0_click
-	$mnuEventsAppsIds1_click
-	$mnuEventsAuthentication_click
-	$mnuEventsCrashes_click
-	$mnuEventsNetwork_click
-	$mnuEventsRDS_click
-	$mnuEventsServices_click
-	$mnuEventsSQL_click
-	$mnuEventsWindowsFirewall_click
+	$mnuEventClassesAccount_click
+	$mnuEventClassesAD_click
+	$mnuEventClassesApps_click
+	$mnuEventClassesAppsIds0_click
+	$mnuEventClassesAppsIds1_click
+	$mnuEventClassesAuthentication_click
+	$mnuEventClassesCrashes_click
+	$mnuEventClassesNetwork_click
+	$mnuEventClassesRDS_click
+	$mnuEventClassesServices_click
+	$mnuEventClassesSQL_click
+	$mnuEventClassesWindowsFirewall_click
 	$MnuFileAppend_click
 	$mnuFileExport_click
 	$mnuFileOverwrite_click
@@ -572,7 +546,63 @@ function Get-DatetimeCheck
 
 }
 
+function Get-EventClassList
+{
+	param(
+		[Parameter(Mandatory = $true)]
+		[System.Windows.Forms.ToolStripMenuItem]$MenuItem 
+	)
 
+
+	$EventLogList = @()	
+	#get a list of Event IDs
+	foreach	($GroupItem in $MenuItem.DropDownItems)
+	{
+		# Use a split in case there are multiple logs that needs to be loaded.
+		$AppLogGroup = $Groupitem.tag.split("|")
+		foreach	($group in $AppLogGroup)
+		{
+			# Split the log name from the event IDs and takes the resultiing number and feeds it into the hashtable to get the log name
+			$EventLog = ($group.split(":"))[0]
+			# Takes the second half of the .tag and splits it by commas to get each individual event id
+			$EventIDs = $(($group.split(":"))[1]).split(",")
+
+			# Now we toss them into our array for temporary storage
+			foreach ($event in $eventids)
+			{
+				$EventLogList += [PSCustomObject]@{
+					EventLog = $EventLog
+					EventID = $event
+				}
+			}
+		}
+	}
+
+	$EventFilters = @()
+	#now that we've got our complete list, we need to split them up by event log and create an eventfilter for each
+	foreach ($Log in ($EventLogList | sort-object -Property EventLog -unique).EventLog)
+	{
+		# Get all the eventids for this log
+		$EventIDs = ($EventLogList | where-object -Property EventLog -eq $log).EventId
+
+		# Create a hashfilter and add it to the array
+		$EventFilter = @{Logname= $Log
+			Id = $EventIDs
+			StartTime= Get-DatetimeCheck 'Start'
+			EndTime= Get-DatetimeCheck 'End'
+		}
+		$EventFilters += $EventFilter
+	}
+
+	# All that work just to create the filters, now we get the events
+	Get-EventsList
+
+	#Then get them sorted
+	$SortedEvents = Group-EventsUnique
+
+	#then display them in the datagridview
+	Update-DataTable $SortedEvents
+}
 
 
 function Get-EventLogList
@@ -594,13 +624,48 @@ function Get-EventLogList
 function Get-EventsList
 {
 	[System.Collections.ArrayList]$script:EventsList = @()
-	foreach ($Filter in $script:EventFilter) {
+	foreach ($Filter in $EventFilters) {
 		$script:EventsList += Get-WinEvent -Verbose:$false -FilterHashtable $Filter | Select-object -Property ProviderName,LogName,TimeCreated,ID,LevelDisplayName,Message,MachineName
 
 	}
 
 	#change to datatable and populate
 	return $EventsList
+}
+
+function get-MenuEvents
+{
+	[System.Collections.ArrayList]$MenuItems = @()
+	for ($i=1; $i -lt $mnuEventClasses.DropDownItems.count; $i++)
+	{
+		
+				
+		$EventIdGroups = @()
+		$index = 0
+		foreach ($item in $mnuEventClasses.DropDownItems[$i].DropDownItems) 
+		{
+			$MenuIDGroup = [PSCustomObject]@{
+				FriendlyName = $item.text
+				ControlNumber = $Index
+				Checked = $item.checked
+				EventString = $item.tag
+				Tooltip = $item.ToolTipText
+			}	
+			
+			$EventIdGroups += $MenuIDGroup
+			$index ++
+		}
+		$MenuEventClass = [PSCustomObject]@{
+			FriendlyName = $mnuEventClasses.DropDownItems[$i].text
+			MenuControlName = ($mnuEventClasses.DropDownItems[$i].name)
+			OrderNumber = $i
+			ToolTip = $mnuEventClasses.DropDownItems[$i].ToolTipText
+			EventgroupItems = $EventIdGroups
+		}
+		$MenuItems += $MenuEventClass
+	}
+
+	Return $MenuItems
 }
 
 function Group-EventsUnique
@@ -669,6 +734,19 @@ function Group-EventsUnique
 	return $UniqueEvents
 }
 
+function Import-Menu
+{
+	param(
+	[Parameter(Mandatory = $true)]
+        [System.Collections.ArrayList]$MenuObject
+	)
+
+	for ($i = $mnueventclasses.dropdownitems.count-1; $i -gt 0; $i--)
+	{
+		$mnueventclasses.DropDownItems.RemoveAt($i)
+	}
+}
+
 function Update-DataTable
 {
 	param(
@@ -703,18 +781,18 @@ function Update-DataTable
 	{
 		$lblNumUniqueTitle.text = 'Total Number Events:'
 	}
-	$TS = $SortedEventsDatatable | measure-object -Property Num -sum
-	$lbltest.text = "TE: $($eventslist.count) TS:$($TS.sum)"
+
 }
 
 function Update-EventFilter
 {
-
-	$script:EventFilter = @{Logname= Get-EventLogList
+	$EventFilters = @()
+	$EventFilter = @{Logname= Get-EventLogList
 		Level= Get-CheckboxValues
 		StartTime= Get-DatetimeCheck 'Start'
 		EndTime= Get-DatetimeCheck 'End'
-	}    
+	}
+	$EventFilters += $EventFilter 
 }
 	
 
@@ -724,4 +802,4 @@ function Update-EventFilter
 
 Add-Type -AssemblyName System.Windows.Forms
 . (Join-Path $PSScriptRoot 'eventviewergui.designer.ps1')
-$frmEventHelper.ShowDialog()
+$frmEventFiend.ShowDialog()

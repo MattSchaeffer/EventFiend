@@ -1,3 +1,768 @@
+
+<#
+        .DESCRIPTION
+            Grabs events from Windows Event viewer and organizes them into lists of unique events and number of times event occurred to make troubleshooting easier.
+			Includes a GUI.
+        .NOTES
+            Author: Matt Schaeffer
+            v .1 - in progress
+        .LINK
+            https://github.com/Synoptek-ServiceEnablement/PowershellToolbox/tree/main/EventViewerGUI
+        .PARAMETERS
+            This app uses no external parameters and runs as a standalone application with GUI
+
+		Note that to add new menu items, some steps have to be followed (will likely move this to better documentation later with step-by-steps)
+		1) Create a new menu in the $mnuMainEvents if it's a new class of searches (like a new app or group of events that are related)
+		   Use the naming format "$mnuMenuSubmenuSubsubmenu".  You can take an existing one and duplicate it, but make sure you duplicate
+		   everything from the control creation, definition
+			a) Create an event for mouse click named $mnuName_click The event itself will be created when you duplicate an item from 
+				step 1 properly, but you'll need to create the variable for the code that it runs.  Copy one of the other menu items 
+				and modify the hashtable entries and assign one log to one number.  This is done because some event numbers exist in 
+				multiple logs, so the menu ID specific searches just checks one log at a time so it doesn't get false values  These 
+				numbers are used later for defining which log an event id belongs to.  The only two things you should need to change
+				are the hashtable (if using different logs), and the name of the array containing the submenu events.
+		2) To add submenus to a menu item, do the same steps as in step 1, and copy and existing one and follow the naming convention
+			The one place that naming conventions change for the submenus is that they are all named after the parent, but have "id#"
+			appended where # is what number item they are on the list, starting from 0
+			a) Add a "$mnuFullName_click" event and make sure you copy an existing and rename variables to match your new menu.
+				This scriptblock just changes the .checked value from $true to $false, or back.  The .checked value is what is what is
+				checked to make sure we want to search that eventid
+			b) All new submenus need to be added to the parent control array in the $form_load section.  It's just an array that each of 
+				the submenus is added to in order to allow the script to easily loop through menus.  If it's a new menu item, create a new
+				array following the same naming convention of "$mnuMenuSubmenu..ids" (same name as the menus they contain, but without a number at the end)
+			c) In the submenu control, add the events that need to be searched.  This will be done in the form of #:event#,event# where the
+				number before the ":" is the number representing the eventlog in the hashtable from step 1.  If you are adding a new event
+				that isn't listed in the parent menu's hashtable, just add another hash and increment the number and add the new log name
+				If you need to pull from multiple logs for the same submenu item, use a pipe ("|") between to separate the values.
+				Example: If we wanted to pull event 2834 and 2835 from the Application log, and event 23, 583, and 1123 from the System log,
+				Our $EventLogList hastable should have 1=Application, 2=System, and then the submenu .tag would be 1:2834,2335|2:23,583,1123
+				It might be overly complex, but I wrote it, and you didn't, so you are stuck with it unless you want to rewrite the code. :)
+				I did it with the idea of being able to expand this.  Maybe in the future I'll add some functionality to do all this in code.   Maybe.
+        
+    #>
+
+	#This script requires it to be run as admin to access all logs.  This section checks for admin and reruns the script as admin if it's not.
+#todo Remove this comments when ready for production
+<# Commented out while working on it, but will add in when finished
+	function Test-Admin {
+		$currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+		$currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+	}
+	
+	if ((Test-Admin) -eq $false)  {
+		if ($elevated) {
+			# tried to elevate, did not work, aborting
+		} else {
+			Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated' -f ($myinvocation.MyCommand.Definition))
+		}
+		exit
+	}
+	#>
+
+##########################################
+## Variables and classes
+##########################################
+
+$script:EventsList = @()					#The master list of the events collected before filtering
+$script:SortedEventsDatatable = New-Object System.Data.DataTable     # The master list after being filtered to unique IDs or Messages
+# todo remove this line if not needed : $script:CheckValues = 2,3
+$Levels = @('Placeholder-0','Critical','Error', 'Warning', 'Information', 'Verbose')   #Used to convert the level number to the expected word value
+[System.Collections.ArrayList]$EventFilters = @()
+[hashtable]$EventFilter = @{Logname='System','Application'               # The event filter used to get the event logs
+	Level=2,3
+	StartTime= (get-date).AddDays(-1)
+	EndTime= (get-date)
+}
+$Eventfilters += $EventFilter
+$EventClassControlArray = @()												# An array containing all menu items under "Event Classes" used to loop through controls for import/export/etc
+
+##########################################
+## Classes
+##########################################
+
+Class EventGroupItem{
+	[string]$FriendlyName
+	[int16]$ControlNumber
+	[bool]$Checked
+	[string]$ToolTip
+	[string]$EventString
+}
+
+Class EventClassMenuItem{
+	
+	[string]$FriendlyName			# This is the name that will show in the text value
+	[string]$MenuControlName		# This is the name used by the program to keep track of the control.  KISS
+	[int16]$OrderNumber
+	[string]$ToolTip
+	[System.Collections.ArrayList]$EventGroupItems
+
+}
+
+##########################################
+## Form event variables
+##########################################
+
+$btnGetEvents_click = {
+	
+	Update-EventFilter
+	Get-EventsList
+	
+	$SortedEvents = Group-EventsUnique
+
+	Update-DataTable $SortedEvents
+}
+
+$btnConnectRemote_click = {
+	write-host "To be created"
+}
+
+
+
+$dgvEvents_CellClick = {
+	$txtEventMessages.Text = $dgvEvents.SelectedRows.cells[6].value
+}
+
+
+
+$form_load = {
+	# Load a list of the event logs into control
+	$EventLogs = Get-EventLog -List | select-object -property @{Name = 'Scan'; Expression = {if (($_.log -eq 'Application') -or ($_.log -eq 'System')){$true}else{$false}}},@{name = 'Entries'; expression = {if ($null -ne $_.Entries.count){$_.Entries.count}else{0}}},Log
+	$script:LogListTable = ConvertTo-DataTable -InputObject $eventlogs
+	$dgvLogsList.datasource = $script:LogListTable
+	$dgvLogsList.Columns[0].AutoSizeMode = [System.Windows.Forms.DataGridViewAutoSizeColumnMode]::AllCells
+	$dgvLogsList.Columns[1].AutoSizeMode = [System.Windows.Forms.DataGridViewAutoSizeColumnMode]::AllCells
+	$dgvLogsList.Columns[2].AutoSizeMode = [System.Windows.Forms.DataGridViewAutoSizeColumnMode]::AllCells
+	
+
+	# Set calendar controls
+	$dtpkstartdate.MinDate = ([datetime]::today).AddDays(-90)
+	$dtpkstartdate.MaxDate = [datetime]::today
+	$dtpkstartdate.value = ([datetime]::today).AddDays(-1)
+	$dtpkenddate.MinDate = ([datetime]::today).AddDays(-90)
+	$dtpkenddate.MaxDate = [datetime]::today
+	$dtpkenddate.value = [datetime]::today
+	$dtpkStartTime.Value  = [datetime]::Now
+	$dtpkEndTime.Value  = [datetime]::Now
+
+	# Load Controls into an array
+	$script:mnuEventClassesAppsIds = ($mnuEventClassesAppsIds0,$mnuEventClassesAppsIds1)
+}
+
+
+
+
+
+$mnuEventClassesAD_click = {
+
+}
+
+$mnuEventClassesApps_click = {
+	
+	#close the dropdown so it isn't in the way
+	$mnuEventClasses.HideDropDown()
+	Get-EventClassList $mnueventclassesapps
+}
+
+$mnuEventClassesAppsIds0_click = {
+
+	if ($mnuEventClassesAppsIds0.Checked -eq $true)
+	{
+		$mnuEventClassesAppsIds0.Checked = $false
+	}
+	else {
+		$mnuEventClassesAppsIds0.Checked = $true
+	}
+}
+
+$mnuEventClassesAppsIds1_click = {
+	if ($mnuEventClassesAppsIds1.Checked -eq $true)
+	{
+		$mnuEventClassesAppsIds1.Checked = $false
+	}
+	else {
+		$mnuEventClassesAppsIds1.Checked = $true
+	}
+}
+
+$mnuEventClassesAuthentication_click = {
+}
+
+$mnuEventClassesNetwork_click = {
+
+}
+
+$mnuEventClassesRDS_click = {
+
+}
+
+$mnuEventClassesServices_click = {
+
+}
+
+$mnuEventClassesSQL_click = {
+
+}
+
+
+$mnuWindowsUpdates_click = {
+
+}
+
+$mnuEventClassesWindowsFirewall_click = {
+
+}
+
+$mnuEventClassesCrashes_click = {
+
+}
+
+$MnuFileAppend_click = {
+	$MnuFileAppend.checked = $true
+	$mnuFileOverwrite.checked = $false
+}
+
+$mnuFileExport_click = {
+	
+	# Make sure there are results before trying to save them.
+	if (!$dgvEvents.RowCount -gt 0)
+	{
+		[System.Windows.forms.MessageBox]::Show("No results to save.  Click on Get Events button to get a collection first", 'WARNING')
+		
+	}
+	else{
+		#pulls up a save dialog box for where to save the event log dump
+		$OpenFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+		$OpenFileDialog.initialDirectory = "C:\Support"
+		$OpenFileDialog.filter = "Text (*.txt)| *.txt|CSV (*.csv)|*.csv"
+		$OpenFileDialog.ShowDialog() |  Out-Null
+		$SaveFile = $OpenFileDialog.filename
+		Export-Events $SaveFile
+	}
+}
+
+$mnuFileOverwrite_click = {
+	$mnuFileOverwrite.checked = $true
+	$MnuFileAppend.checked = $false
+}
+
+$mnuFileSaveSettings_click = {
+
+	$MenuSettings = get-MenuEvents
+	$MenuJSON = ConvertTo-Json -InputObject $MenuSettings -depth 3 
+	$MenuJSON > (join-path $PSScriptRoot 'EventClassesSave.json')
+	[System.Windows.forms.MessageBox]::Show("File has been exported")
+}
+
+$mnuHelpHelp_click = {
+	[System.Windows.forms.MessageBox]::Show("Help?  You think you get help with this program?  You're lucky I even wrote it.  Hahahah!`r`nJust kidding.  This is a placeholder.  If you need help or find a bug, reach out to Matt Schaeffer")
+}
+
+$mnuHelpAbout_click = {
+	[System.Windows.forms.MessageBox]::Show("Event Viewer Helper`r`nAuthor: Matt Schaeffer`r`nVersion: 1.0 Preview`r`n2022")
+}
+
+
+$rbUnique_checkedchanged = {
+	
+	$SortedEvents = Group-EventsUnique 
+	Update-DataTable $SortedEvents
+}
+
+function Show-ToolTip {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [System.Windows.Forms.Control]$control,
+        [string]$text = $null,
+        [int]$duration = 1000
+    )
+    if ([string]::IsNullOrWhiteSpace($text)) { $text = $control.Tag }
+    $pos = [System.Drawing.Point]::new($control.Right, $control.Top)
+    $obj_tt.Show($text,$form, $pos, $duration)
+}
+
+##########################################
+## Functions
+##########################################
+
+function write-stupidstuff{
+	#The sole function of this function is to put event handler variables somewhere so Visual Studio Code quites complaining that
+	#they aren't being used when they area.  Nothing links to or uses this function
+
+	$btnConnectRemote_click
+	$btnConnectRemote_click
+	$btnExportData_click
+	$btnGetEvents_click
+	$btnSelectPath_click
+	$chkbxSelectTD_checkedchanged
+	$dgvEvents_CellClick
+	$dgvEventsHeader_click
+	$dgvEventsHeader_doubleclick
+	$form_load
+	$mnuEventClassesAccount_click
+	$mnuEventClassesAD_click
+	$mnuEventClassesApps_click
+	$mnuEventClassesAppsIds0_click
+	$mnuEventClassesAppsIds1_click
+	$mnuEventClassesAuthentication_click
+	$mnuEventClassesCrashes_click
+	$mnuEventClassesNetwork_click
+	$mnuEventClassesRDS_click
+	$mnuEventClassesServices_click
+	$mnuEventClassesSQL_click
+	$mnuEventClassesWindowsFirewall_click
+	$MnuFileAppend_click
+	$mnuFileExport_click
+	$mnuFileOverwrite_click
+	$mnuFileSaveSettings_click
+	$mnuHelpAbout_click
+	$mnuHelpHelp_click
+	$mnuWindowsUpdates
+	$mnuWindowsUpdates_click
+	$rbUnique_checkedchanged
+	
+}
+
+function ConvertTo-DataTable
+{
+	<#
+		.SYNOPSIS
+			Converts objects into a DataTable for use with DataGridView controls
+	
+		.DESCRIPTION
+			Converts objects into a DataTable, which are used for DataBinding.
+	
+		.PARAMETER  InputObject
+			The input to convert into a DataTable.
+	
+		.PARAMETER  Table
+			The DataTable you wish to load the input into.
+	
+		.PARAMETER RetainColumns
+			This switch tells the function to keep the DataTable's existing columns.
+		
+		.PARAMETER FilterWMIProperties
+			This switch removes WMI properties that start with an underline.
+	
+		.EXAMPLE
+			$DataTable = ConvertTo-DataTable -InputObject (Get-Process)
+	#>
+	[OutputType([System.Data.DataTable])]
+	param(
+	[ValidateNotNull()]
+	$InputObject, 
+	[ValidateNotNull()]
+	[System.Data.DataTable]$Table,
+	[switch]$RetainColumns,
+	[switch]$FilterWMIProperties)
+	
+	if($Table -eq $null)
+	{
+		$Table = New-Object System.Data.DataTable
+	}
+
+	if($InputObject-is [System.Data.DataTable])
+	{
+		$Table = $InputObject
+	}
+	else
+	{
+		if(-not $RetainColumns -or $Table.Columns.Count -eq 0)
+		{
+			#Clear out the Table Contents
+			$Table.Clear()
+
+			if($null -eq $InputObject){ return } #Empty Data
+			
+			$object = $null
+			#find the first non null value
+			foreach($item in $InputObject)
+			{
+				if($null -ne $item)
+				{
+					$object = $item
+					break	
+				}
+			}
+
+			if($null -eq $object) { return } #All null then empty
+			
+			#Get all the properties in order to create the columns
+			foreach ($prop in $object.PSObject.Get_Properties())
+			{
+				if(-not $FilterWMIProperties -or -not $prop.Name.StartsWith('__'))#filter out WMI properties
+				{
+					#Get the type from the Definition string
+					$type = $null
+					
+					if($null -ne $prop.Value)
+					{
+						try{ $type = $prop.Value.GetType() } catch {}
+					}
+
+					if($null -ne $type) # -and [System.Type]::GetTypeCode($type) -ne 'Object')
+					{
+		      			[void]$table.Columns.Add($prop.Name, $type) 
+					}
+					else #Type info not found
+					{ 
+						[void]$table.Columns.Add($prop.Name) 	
+					}
+				}
+		    }
+			
+			if($object -is [System.Data.DataRow])
+			{
+				foreach($item in $InputObject)
+				{	
+					$Table.Rows.Add($item)
+				}
+				return  @(,$Table)
+			}
+		}
+		else
+		{
+			$Table.Rows.Clear()	
+		}
+		
+		foreach($item in $InputObject)
+		{		
+			$row = $table.NewRow()
+			
+			if($item)
+			{
+				foreach ($prop in $item.PSObject.Get_Properties())
+				{
+					if($table.Columns.Contains($prop.Name))
+					{
+						$row.Item($prop.Name) = $prop.Value
+					}
+				}
+			}
+			[void]$table.Rows.Add($row)
+		}
+	}
+
+	return @(,$Table)	
+}
+
+function Export-Events{
+	param(
+		[ValidateNotNull()]
+			[string]$SaveFile 
+		)
+	
+	#exports the events to .txt or .csv
+	if ($SaveFile -match ".txt")
+	{
+		if ($mnuFileAppend.checked -eq $true)
+		{
+			$script:SortedEventsDatatable | sort-object -Property Num -Descending | format-list >> "$($savefile)"
+		}
+		else 
+		{
+			$script:SortedEventsDatatable | sort-object -Property Num -Descending | format-list > "$($savefile)"
+		}
+	}
+	elseif ($SaveFile -match ".csv")
+	{
+		if ($mnuFileAppend.checked -eq $true)
+		{
+			$script:SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Append -Path $savefile
+		}
+		else 
+		{
+			$script:SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Path $savefile
+		}
+		
+	}
+	
+	if ($mnuFileAppend.checked -eq $true){$Savemsg = "Your file has been saved to $Savepath"}else {"Your file has been appended to $Savepath"}
+	[System.Windows.forms.MessageBox]::Show("$Savemsg", 'Saved')
+
+}
+
+function Get-CheckboxValues
+{
+	$Chks = @()
+	If ($chkbxCritical.checked -eq $true)
+	{
+		$Chks += 1
+	}
+	If ($chkbxError.checked -eq $true)
+	{
+		$Chks += 2
+	}
+	If ($chkbxWarning.checked -eq $true)
+	{
+		$Chks += 3
+	}
+
+	return $chks
+
+}
+
+
+function Get-DatetimeCheck
+{
+	param(
+	[ValidateNotNull()]
+		[string]$StartorEnd 
+	)
+	switch ($StartorEnd)
+	{
+		'Start'
+		{
+			$ControlDateTime = get-date -year $dtpkStartDate.value.Year -month $dtpkStartDate.value.Month -day $dtpkStartDate.Value.Day -hour $dtpkStartTime.Value.Hour -Minute $dtpkStartTime.Value.Minute -Second $dtpkStartTime.Value.Second
+			break
+		}	
+		'End'
+		{
+			$ControlDateTime = get-date -year $dtpkEndDate.value.Year -month $dtpkEndDate.value.Month -day $dtpkEndDate.Value.Day -hour $dtpkEndTime.Value.Hour -Minute $dtpkEndTime.Value.Minute -Second $dtpkEndTime.Value.Second
+			break
+		}
+	}
+	return $ControlDateTime
+
+}
+
+function Get-EventClassList
+{
+	param(
+		[Parameter(Mandatory = $true)]
+		[System.Windows.Forms.ToolStripMenuItem]$MenuItem 
+	)
+
+
+	$EventLogList = @()	
+	#get a list of Event IDs
+	foreach	($GroupItem in $MenuItem.DropDownItems)
+	{
+		# Use a split in case there are multiple logs that needs to be loaded.
+		$AppLogGroup = $Groupitem.tag.split("|")
+		foreach	($group in $AppLogGroup)
+		{
+			# Split the log name from the event IDs and takes the resultiing number and feeds it into the hashtable to get the log name
+			$EventLog = ($group.split(":"))[0]
+			# Takes the second half of the .tag and splits it by commas to get each individual event id
+			$EventIDs = $(($group.split(":"))[1]).split(",")
+
+			# Now we toss them into our array for temporary storage
+			foreach ($event in $eventids)
+			{
+				$EventLogList += [PSCustomObject]@{
+					EventLog = $EventLog
+					EventID = $event
+				}
+			}
+		}
+	}
+
+	$EventFilters = @()
+	#now that we've got our complete list, we need to split them up by event log and create an eventfilter for each
+	foreach ($Log in ($EventLogList | sort-object -Property EventLog -unique).EventLog)
+	{
+		# Get all the eventids for this log
+		$EventIDs = ($EventLogList | where-object -Property EventLog -eq $log).EventId
+
+		# Create a hashfilter and add it to the array
+		$EventFilter = @{Logname= $Log
+			Id = $EventIDs
+			StartTime= Get-DatetimeCheck 'Start'
+			EndTime= Get-DatetimeCheck 'End'
+		}
+		$EventFilters += $EventFilter
+	}
+
+	# All that work just to create the filters, now we get the events
+	Get-EventsList
+
+	#Then get them sorted
+	$SortedEvents = Group-EventsUnique
+
+	#then display them in the datagridview
+	Update-DataTable $SortedEvents
+}
+
+
+function Get-EventLogList
+{
+	$LogsToSearch = @()
+	#loop through and find all checked values. and find all logs that have been checked
+	foreach ($Row in $dgvLogsList.rows) 
+	{
+		if ($row.cells[0].value -eq $true)
+		{
+			$LogsToSearch += $row.cells[2].value	
+		}
+		
+	}
+	Return $LogsToSearch
+}
+
+
+function Get-EventsList
+{
+	[System.Collections.ArrayList]$script:EventsList = @()
+	foreach ($Filter in $EventFilters) {
+		$script:EventsList += Get-WinEvent -Verbose:$false -FilterHashtable $Filter | Select-object -Property ProviderName,LogName,TimeCreated,ID,LevelDisplayName,Message,MachineName
+
+	}
+
+	#change to datatable and populate
+	return $EventsList
+}
+
+function get-MenuEvents
+{
+	[System.Collections.ArrayList]$MenuItems = @()
+	for ($i=1; $i -lt $mnuEventClasses.DropDownItems.count; $i++)
+	{
+		$MenuItem = new-object EventClassMenuItem
+		$MenuItem.FriendlyName = $mnuEventClasses.DropDownItems[$i].text
+		$MenuItem.MenuControlName = ($mnuEventClasses.DropDownItems[$i].name)
+		$MenuItem.OrderNumber = $i
+		$MenuItems.ToolTip = $mnuEventClasses.DropDownItems[$i].ToolTip
+		$MenuItem.EventGroupItems = @()
+
+		$index = 0
+		foreach ($item in $mnuEventClasses.DropDownItems[$i].DropDownItems) 
+		{
+			$MenuGroup = new-object EventGroupItem	
+			$MenuGroup.FriendlyName = $item.text
+			$MenuGroup.ControlNumber = $Index
+			$MenuGroup.Checked = $item.checked
+			$MenuGroup.EventString = $item.tag
+			$Menuitem.EventgroupItems += $MenuGroup
+			$index ++
+		}
+		$MenuItems += $MenuItem
+	}
+
+	Return $MenuItems
+}
+
+function Group-EventsUnique
+{
+	$UniqueEvents = @()
+	#Sorts events list into unique entries based on either the message, or eventID
+	if ($rbUniqueByMessage.Checked -eq $true)
+	{
+		$UniqueEventsPre = $script:EventsList | Sort-Object -Property Message -Unique
+		Foreach ($ev in $UniqueEventsPre){
+			$count = ($script:EventsList | where-object Message -eq ($ev.Message)).count
+			if ($count -gt 0){<#Do nothing#>}else{$count = 1}
+			$NewRecord = [PSCustomObject]@{
+				Num = $count
+				ProviderName = $ev.ProviderName
+				LogName = $($ev.LogName)
+				TimeCreated = $($ev.TimeCreated)
+				ID = $($ev.ID)
+				LevelDisplayName = $($ev.LevelDisplayName)
+				Message = $($ev.Message)
+				ComputerName = $($ev.MachineName)
+			}
+			$UniqueEvents += $NewRecord
+			
+		}	
+	}
+	elseif ($rbUniqueByID.checked -eq $true )
+	{
+		$UniqueEventsPre = $script:EventsList | Sort-Object -Property ID -Unique
+		Foreach ($ev in $UniqueEventsPre){
+			$count = ($script:EventsList | where-object ID -eq ($ev.id)).count
+			if ($count -gt 0){<#Do nothing#>}else{$count = 1}
+			$NewRecord = [PSCustomObject]@{
+				Num = $count
+				ProviderName = $ev.ProviderName
+				LogName = $($ev.LogName)
+				TimeCreated = $($ev.TimeCreated)
+				ID = $($ev.ID)
+				LevelDisplayName = $($ev.LevelDisplayName)
+				Message = $($ev.Message)
+				ComputerName = $($ev.MachineName)
+			}
+			$UniqueEvents += $NewRecord
+		}	
+	}
+	else 
+	{
+		$UniqueEventsPre = $script:EventsList
+		foreach ($ev in $UniqueEventsPre) {
+			$count =1
+			$NewRecord = [PSCustomObject]@{
+				Num = $count
+				ProviderName = $ev.ProviderName
+				LogName = $($ev.LogName)
+				TimeCreated = $($ev.TimeCreated)
+				ID = $($ev.ID)
+				LevelDisplayName = $($ev.LevelDisplayName)
+				Message = $($ev.Message)
+				ComputerName = $($ev.MachineName)
+			}
+			$UniqueEvents += $NewRecord
+		}	
+	}
+	
+	
+	return $UniqueEvents
+}
+
+function Update-DataTable
+{
+	param(
+	[ValidateNotNull()]
+		[array]$Array 
+	)
+	$dgvevents.datasource = $null
+	$script:SortedEventsDatatable = Convertto-DataTable -inputobject $Array
+
+	#set messages to not visible
+	$dgvEvents.datasource = $script:SortedEventsDatatable
+	$dgvEvents.columns[6].visible = $false
+	$dgvEvents.columns[7].visible = $false
+	
+	for ($i=0; $i -lt $dgvEvents.columncount -1; $i++ )
+	{
+		$dgvEvents.Columns[$i].AutoSizeMode = [System.Windows.Forms.DataGridViewAutoSizeColumnMode]::AllCells
+	}
+
+	$lblNumEvents.text = $dgvEvents.RowCount
+
+
+	if ($rbUniqueByID.checked -eq $true)
+	{
+		$lblNumUniqueTitle.text = 'Num Unique Events by Event ID:'
+	}
+	elseif ($rbUniqueByMessage.Checked -eq $true)
+	{
+		$lblNumUniqueTitle.text = 'Num Unique Events by Message:'
+	}
+	else 
+	{
+		$lblNumUniqueTitle.text = 'Total Number Events:'
+	}
+
+}
+
+function Update-EventFilter
+{
+	$EventFilters = @()
+	$EventFilter = @{Logname= Get-EventLogList
+		Level= Get-CheckboxValues
+		StartTime= Get-DatetimeCheck 'Start'
+		EndTime= Get-DatetimeCheck 'End'
+	}
+	$EventFilters += $EventFilter 
+}
+	
+
+##########################################
+## Start Code
+##########################################
+
+Add-Type -AssemblyName System.Windows.Forms
+
 $frmEventFiend = New-Object -TypeName System.Windows.Forms.Form
 [System.Windows.Forms.DataGridView]$dgvEvents = $null
 [System.Windows.Forms.DateTimePicker]$dtpkStartDate = $null
@@ -618,7 +1383,6 @@ $SaveSettingsToolStripMenuItem.add_Click($mnuFileSaveSettings_click)
 $LoadSettingsToolStripMenuItem.Name = [System.String]'LoadSettingsToolStripMenuItem'
 $LoadSettingsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]189,[System.Int32]24))
 $LoadSettingsToolStripMenuItem.Text = [System.String]'Load Settings'
-$LoadSettingsToolStripMenuItem.add_Click($mnuFileLoad_click)
 #
 #mnuEventClasses
 #
@@ -1240,14 +2004,14 @@ $mnuHelp.Text = [System.String]'Help'
 #AboutToolStripMenuItem
 #
 $AboutToolStripMenuItem.Name = [System.String]'AboutToolStripMenuItem'
-$AboutToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]152,[System.Int32]24))
+$AboutToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]119,[System.Int32]24))
 $AboutToolStripMenuItem.Text = [System.String]'About'
 $AboutToolStripMenuItem.add_Click($mnuHelpAbout_click)
 #
 #HelpToolStripMenuItem1
 #
 $HelpToolStripMenuItem1.Name = [System.String]'HelpToolStripMenuItem1'
-$HelpToolStripMenuItem1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]152,[System.Int32]24))
+$HelpToolStripMenuItem1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]119,[System.Int32]24))
 $HelpToolStripMenuItem1.Text = [System.String]'Help'
 $HelpToolStripMenuItem1.add_Click($mnuHelpHelp_click)
 #
@@ -1433,3 +2197,6 @@ Add-Member -InputObject $frmEventFiend -Name Control1 -Value $Control1 -MemberTy
 Add-Member -InputObject $frmEventFiend -Name lblEndDateTime -Value $lblEndDateTime -MemberType NoteProperty
 }
 . InitializeComponent
+
+
+$frmEventFiend.ShowDialog()
