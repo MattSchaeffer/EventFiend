@@ -6,6 +6,15 @@
  to be redesigning it.  It's still pretty useful though even in it's current state
  and it's  under active development
 
+ Files:
+ Eventviewergui.ps1: The primary code for EventFiend.  Will get renamed to EventFiend.ps1 in the next push
+
+ Eventviewergui.designer.ps1: The GUI form and controls
+
+ Eventfiend.ps1:  This is the the GUI copied and pasted into the bottom of the eventviewer script to make it a single file.
+
+ EventClass.json Just a copy of the existing menu that I exported.  Not needed or important.
+
  There are two files.  One contains most of the code that does work and that you execute, and the design form 
  that has most of  the GUI and form parts.  These will likely be combined at some point, but not until the redesign 
  and I  see how much I've been able to shrink the code.  Despite being in early/mid development, it's safe
