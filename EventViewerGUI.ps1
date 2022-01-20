@@ -1,5 +1,4 @@
 
-
 <#
         .DESCRIPTION
             Grabs events from Windows Event viewer and organizes them into lists of unique events and number of times event occurred to make troubleshooting easier.
@@ -64,8 +63,8 @@
 ## Variables and classes
 ##########################################
 
-$script:EventsList = @()					#The master list of the events collected before filtering
-$script:SortedEventsDatatable = New-Object System.Data.DataTable     # The master list after being filtered to unique IDs or Messages
+#$script:EventsList = @()					#The master list of the events collected before filtering
+$SortedEventsDatatable = New-Object System.Data.DataTable     # The master list after being filtered to unique IDs or Messages
 # todo remove this line if not needed : $script:CheckValues = 2,3
 $Levels = @('Placeholder-0','Critical','Error', 'Warning', 'Information', 'Verbose')   #Used to convert the level number to the expected word value
 [System.Collections.ArrayList]$EventFilters = @()
@@ -75,7 +74,7 @@ $Levels = @('Placeholder-0','Critical','Error', 'Warning', 'Information', 'Verbo
 	EndTime= (get-date)
 }
 $Eventfilters += $EventFilter
-$EventClassControlArray = @()												# An array containing all menu items under "Event Classes" used to loop through controls for import/export/etc
+											# An array containing all menu items under "Event Classes" used to loop through controls for import/export/etc
 
 
 
@@ -86,11 +85,13 @@ $EventClassControlArray = @()												# An array containing all menu items un
 $btnGetEvents_click = {
 	
 	Update-EventFilter
-	Get-EventsList
+	$MyEvents = Get-EventsList
 	
-	$SortedEvents = Group-EventsUnique
-
-	Update-DataTable $SortedEvents
+	if ($MyEvents)
+	{
+		$SortedEvents = Group-EventsUnique $MyEvents
+		Update-DataTable $SortedEvents
+	}
 }
 
 $btnConnectRemote_click = {
@@ -131,71 +132,12 @@ $form_load = {
 
 
 
-
-
-$mnuEventClassesAD_click = {
-
-}
-
-$mnuEventClassesApps_click = {
-	
+$mnuEventClasses_click = {
 	#close the dropdown so it isn't in the way
 	$mnuEventClasses.HideDropDown()
-	Get-EventClassList $mnueventclassesapps
+	Get-EventClassList $this
 }
 
-$mnuEventClassesAppsIds0_click = {
-
-	if ($mnuEventClassesAppsIds0.Checked -eq $true)
-	{
-		$mnuEventClassesAppsIds0.Checked = $false
-	}
-	else {
-		$mnuEventClassesAppsIds0.Checked = $true
-	}
-}
-
-$mnuEventClassesAppsIds1_click = {
-	if ($mnuEventClassesAppsIds1.Checked -eq $true)
-	{
-		$mnuEventClassesAppsIds1.Checked = $false
-	}
-	else {
-		$mnuEventClassesAppsIds1.Checked = $true
-	}
-}
-
-$mnuEventClassesAuthentication_click = {
-}
-
-$mnuEventClassesNetwork_click = {
-
-}
-
-$mnuEventClassesRDS_click = {
-
-}
-
-$mnuEventClassesServices_click = {
-
-}
-
-$mnuEventClassesSQL_click = {
-
-}
-
-
-$mnuWindowsUpdates_click = {
-
-}
-
-$mnuEventClassesWindowsFirewall_click = {
-
-}
-
-$mnuEventClassesCrashes_click = {
-
-}
 
 $MnuFileAppend_click = {
 	$MnuFileAppend.checked = $true
@@ -227,21 +169,24 @@ $mnuFileLoad_click = {
 	$OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
 	$OpenFileDialog.initialDirectory = $PSScriptRoot
 	$OpenFileDialog.filter = "XML (*.xml)| *.xml|JSON (*.json)|*.json"
+	$openfiledialog.ShowHelp = $true
 	$OpenFileDialog.ShowDialog() |  Out-Null
-	$SaveFile = $OpenFileDialog.filename
+	$LoadFile = $OpenFileDialog.filename
 	
 	# Check if .JSON or .xml and import appropriately
-	if ($savefile -match ".xml")
+	if ($Loadfile -match ".xml")
 	{
-		$MenuObject = Import-Clixml -Path $Savefile
+		$MenuObject = Import-Clixml -Path $Loadfile
 	}
-	elseif ($savefile -match ".json")
+	elseif ($Loadfile -match ".json")
 	{
 		
 	}
 
-	Import-Menu $MenuObject
-	
+	Reset-Menu
+	#foreach ($item in $MenuObject){
+		Import-EventClassesMenu $MenuObject
+	#}
 }
 
 $mnuFileOverwrite_click = {
@@ -284,7 +229,7 @@ $mnuHelpAbout_click = {
 
 $rbUnique_checkedchanged = {
 	
-	$SortedEvents = Group-EventsUnique 
+	$SortedEvents = Group-EventsUnique $script:EventsList
 	Update-DataTable $SortedEvents
 }
 
@@ -319,20 +264,10 @@ function write-stupidstuff{
 	$dgvEventsHeader_click
 	$dgvEventsHeader_doubleclick
 	$form_load
-	$mnuEventClassesAccount_click
-	$mnuEventClassesAD_click
-	$mnuEventClassesApps_click
-	$mnuEventClassesAppsIds0_click
-	$mnuEventClassesAppsIds1_click
-	$mnuEventClassesAuthentication_click
-	$mnuEventClassesCrashes_click
-	$mnuEventClassesNetwork_click
-	$mnuEventClassesRDS_click
-	$mnuEventClassesServices_click
-	$mnuEventClassesSQL_click
-	$mnuEventClassesWindowsFirewall_click
+	$mnuEventClasses_click
 	$MnuFileAppend_click
 	$mnuFileExport_click
+	$mnuFileLoad_click
 	$mnuFileOverwrite_click
 	$mnuFileSaveSettings_click
 	$mnuHelpAbout_click
@@ -376,7 +311,7 @@ function ConvertTo-DataTable
 	[switch]$RetainColumns,
 	[switch]$FilterWMIProperties)
 	
-	if($Table -eq $null)
+	if($null -eq $Table)
 	{
 		$Table = New-Object System.Data.DataTable
 	}
@@ -477,22 +412,22 @@ function Export-Events{
 	{
 		if ($mnuFileAppend.checked -eq $true)
 		{
-			$script:SortedEventsDatatable | sort-object -Property Num -Descending | format-list >> "$($savefile)"
+			$SortedEventsDatatable | sort-object -Property Num -Descending | format-list >> "$($savefile)"
 		}
 		else 
 		{
-			$script:SortedEventsDatatable | sort-object -Property Num -Descending | format-list > "$($savefile)"
+			$SortedEventsDatatable | sort-object -Property Num -Descending | format-list > "$($savefile)"
 		}
 	}
 	elseif ($SaveFile -match ".csv")
 	{
 		if ($mnuFileAppend.checked -eq $true)
 		{
-			$script:SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Append -Path $savefile
+			$SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Append -Path $savefile
 		}
 		else 
 		{
-			$script:SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Path $savefile
+			$SortedEventsDatatable | sort-object -Property Num -Descending | export-csv -NoType -Path $savefile
 		}
 		
 	}
@@ -594,14 +529,22 @@ function Get-EventClassList
 		$EventFilters += $EventFilter
 	}
 
+	$dgvEvents.DataSource = $null
 	# All that work just to create the filters, now we get the events
-	Get-EventsList
+	$MyEvents = Get-EventsList
 
-	#Then get them sorted
-	$SortedEvents = Group-EventsUnique
+	if ($MyEvents)
+	{
+		#Then get them sorted
+		$SortedEvents = Group-EventsUnique $MyEvents
 
-	#then display them in the datagridview
-	Update-DataTable $SortedEvents
+		#then display them in the datagridview
+		Update-DataTable $SortedEvents
+	}
+	else 
+	{
+		[System.Windows.forms.MessageBox]::Show("No results returned.", 'WARNING')
+	}
 }
 
 
@@ -630,7 +573,7 @@ function Get-EventsList
 	}
 
 	#change to datatable and populate
-	return $EventsList
+	return $script:EventsList
 }
 
 function get-MenuEvents
@@ -670,13 +613,17 @@ function get-MenuEvents
 
 function Group-EventsUnique
 {
+	param(
+		[Parameter(Mandatory = $true)]
+  		[array]$EventsList
+	)
 	$UniqueEvents = @()
 	#Sorts events list into unique entries based on either the message, or eventID
 	if ($rbUniqueByMessage.Checked -eq $true)
 	{
-		$UniqueEventsPre = $script:EventsList | Sort-Object -Property Message -Unique
+		$UniqueEventsPre = $EventsList | Sort-Object -Property Message -Unique
 		Foreach ($ev in $UniqueEventsPre){
-			$count = ($script:EventsList | where-object Message -eq ($ev.Message)).count
+			$count = ($EventsList | where-object Message -eq ($ev.Message)).count
 			if ($count -gt 0){<#Do nothing#>}else{$count = 1}
 			$NewRecord = [PSCustomObject]@{
 				Num = $count
@@ -694,9 +641,9 @@ function Group-EventsUnique
 	}
 	elseif ($rbUniqueByID.checked -eq $true )
 	{
-		$UniqueEventsPre = $script:EventsList | Sort-Object -Property ID -Unique
+		$UniqueEventsPre = $EventsList | Sort-Object -Property ID -Unique
 		Foreach ($ev in $UniqueEventsPre){
-			$count = ($script:EventsList | where-object ID -eq ($ev.id)).count
+			$count = ($EventsList | where-object ID -eq ($ev.id)).count
 			if ($count -gt 0){<#Do nothing#>}else{$count = 1}
 			$NewRecord = [PSCustomObject]@{
 				Num = $count
@@ -713,7 +660,7 @@ function Group-EventsUnique
 	}
 	else 
 	{
-		$UniqueEventsPre = $script:EventsList
+		$UniqueEventsPre = $EventsList
 		foreach ($ev in $UniqueEventsPre) {
 			$count =1
 			$NewRecord = [PSCustomObject]@{
@@ -734,16 +681,59 @@ function Group-EventsUnique
 	return $UniqueEvents
 }
 
-function Import-Menu
-{
+Function Import-EventClassesMenu {
 	param(
-	[Parameter(Mandatory = $true)]
-        [System.Collections.ArrayList]$MenuObject
+	  	[Parameter(Mandatory = $true)]
+    	[array]$EventClassObject
 	)
+    # Fill applications list
+   
+    ForEach ($Item In $EventClassObject) 
+    {
+		
+      	[System.Windows.Forms.ToolStripMenuItem]$mnuEventClass = $null
+    	$mnuEventClass = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+      	$mnuEventClass.Name = [System.String] $item.MenuControlName
+      	$mnuEventClass.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
+      	$mnuEventClass.Text = [System.String] $Item.FriendlyName
+      	$mnuEventClass.CheckOnClick = $true
+      	$mnuEventClass.Add_Click($mnuAllEventClasses_click)
+      	$mnuEventClasses.DropDownItems.add($mnuEventClass)
+      
+      	foreach ($Group in $EventgroupItems) 
+     	{
+			
+			$ControlName =  $item.MenuControlName + "Id" + $ControlNumber
+			# Event Group Items
+			[System.Windows.Forms.,m]$mnuEventClassesGroup = $null
+			$mnuEventClassesGroup = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+			$mnuEventClassesGroup.Name = [System.String] $ControlName
+			$mnuEventClassesGroup.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]390,[System.Int32]24))
+			$mnuEventClassesGroup.Tag = [System.String]$group.tag
+			$mnuEventClassesGroup.Text = [System.String]$Group.FriendlyName
 
-	for ($i = $mnueventclasses.dropdownitems.count-1; $i -gt 0; $i--)
+    
+			if ($group.checked -eq $true)
+			{
+				$mnuEventClassesGroup.Checked = $true
+				$mnuEventClassesGroup.CheckState = [System.Windows.Forms.CheckState]::Checked
+			}
+			else 
+			{
+				$mnuEventClassesGroup.Checked = $true
+				$mnuEventClassesGroup.CheckState = [System.Windows.Forms.CheckState]::Checked
+			}
+		}
+	
+	}
+}
+
+function Reset-Menu{
+
+	for ($i = $mnuEventClasses.DropDownItems.count; $i -gt 0; $i--)
 	{
-		$mnueventclasses.DropDownItems.RemoveAt($i)
+		
+		$mnueventclasses.dropdownitems.remove([System.Windows.Forms.ToolStripMenuItem]$mnuEventClasses.dropdownitems[$i])
 	}
 }
 
@@ -754,10 +744,10 @@ function Update-DataTable
 		[array]$Array 
 	)
 	$dgvevents.datasource = $null
-	$script:SortedEventsDatatable = Convertto-DataTable -inputobject $Array
+	$SortedEventsDatatable = Convertto-DataTable -inputobject $Array
 
 	#set messages to not visible
-	$dgvEvents.datasource = $script:SortedEventsDatatable
+	$dgvEvents.datasource = $SortedEventsDatatable
 	$dgvEvents.columns[6].visible = $false
 	$dgvEvents.columns[7].visible = $false
 	
