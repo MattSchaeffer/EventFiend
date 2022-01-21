@@ -730,7 +730,8 @@ $DCAttemptedToValidateCredentialsToolStripMenuItem.Checked = $true
 $DCAttemptedToValidateCredentialsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DCAttemptedToValidateCredentialsToolStripMenuItem.Name = [System.String]'DCAttemptedToValidateCredentialsToolStripMenuItem'
 $DCAttemptedToValidateCredentialsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
-$DCAttemptedToValidateCredentialsToolStripMenuItem.Text = [System.String]'DC Attempted To Validate Credentials'
+$DCAttemptedToValidateCredentialsToolStripMenuItem.Tag = [System.String]'Security:4776'
+$DCAttemptedToValidateCredentialsToolStripMenuItem.Text = [System.String]'4776 - DC Attempted To Validate Credentials'
 #
 #KerberosPreAuthenticationFailedToolStripMenuItem
 #
@@ -738,6 +739,7 @@ $KerberosPreAuthenticationFailedToolStripMenuItem.Checked = $true
 $KerberosPreAuthenticationFailedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosPreAuthenticationFailedToolStripMenuItem.Name = [System.String]'KerberosPreAuthenticationFailedToolStripMenuItem'
 $KerberosPreAuthenticationFailedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
+$KerberosPreAuthenticationFailedToolStripMenuItem.Tag = [System.String]'Security:4771'
 $KerberosPreAuthenticationFailedToolStripMenuItem.Text = [System.String]'4771 Kerberos Pre-Authentication Failed'
 #
 #KerberosTicketRequestedFailOrSuccessToolStripMenuItem
@@ -746,6 +748,7 @@ $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Checked = $true
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Name = [System.String]'KerberosTicketRequestedFailOrSuccessToolStripMenuItem'
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
+$KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Tag = [System.String]'Security:4768'
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Text = [System.String]'4768 - Kerberos Ticket Requested (Fail or Success)'
 #
 #KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem
@@ -754,6 +757,7 @@ $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Checked = $true
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Name = [System.String]'KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem'
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
+$KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Tag = [System.String]'Security:4769'
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Text = [System.String]'4769 - Kerberos Service Ticket Requested (Fail or Success)'
 #
 #mnuEventClassesNetwork
@@ -1240,14 +1244,14 @@ $mnuHelp.Text = [System.String]'Help'
 #AboutToolStripMenuItem
 #
 $AboutToolStripMenuItem.Name = [System.String]'AboutToolStripMenuItem'
-$AboutToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]152,[System.Int32]24))
+$AboutToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]119,[System.Int32]24))
 $AboutToolStripMenuItem.Text = [System.String]'About'
 $AboutToolStripMenuItem.add_Click($mnuHelpAbout_click)
 #
 #HelpToolStripMenuItem1
 #
 $HelpToolStripMenuItem1.Name = [System.String]'HelpToolStripMenuItem1'
-$HelpToolStripMenuItem1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]152,[System.Int32]24))
+$HelpToolStripMenuItem1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]119,[System.Int32]24))
 $HelpToolStripMenuItem1.Text = [System.String]'Help'
 $HelpToolStripMenuItem1.add_Click($mnuHelpHelp_click)
 #
