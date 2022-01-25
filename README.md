@@ -30,3 +30,15 @@
 	specific categories (like Network, Firewall, SQL Server, Active Directory, etc), where it searches for 
 	specific event ids that indicate problems for that particular application.
 5) (working) Allows you to save the resulting datasets to .txt or .csv files
+
+# Usage
+
+In order to run the GUI, use the following command:
+
+	powershell .\EventFiendGUI.ps1
+
+This will launch the Forms application. To get started, simply apply some filter options in the right-hand filter pane, then click the "Get Events" button. Currently you can filter by event log, event level, time and date range, or aggregate events to generate counts for multiple event occurance.
+
+You can also connect to a remote server to query event logs from it using the "Connect to Remote Server" box.
+
+Note that the menus currently have some limited functionality and are being worked on, but you can still output your filtered events to a text file. Note the file will contain one block of text per event, the same as if you were to output each event using the Get-Event powershell cmdlet.
