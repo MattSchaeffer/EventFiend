@@ -64,6 +64,12 @@ $frmEventFiend = New-Object -TypeName System.Windows.Forms.Form
 [System.Windows.Forms.ToolStripMenuItem]$RDPClientActiveXIsTryingToConnectToolStripMenuItem = $null
 [System.Windows.Forms.ToolStripMenuItem]$RDSConnectionBrokerCommunicationToolStripMenuItem = $null
 [System.Windows.Forms.ToolStripMenuItem]$FailedToStartSessionMonitoringToolStripMenuItem = $null
+[System.Windows.Forms.ToolStripMenuItem]$mnuEventClassesSecurity = $null
+[System.Windows.Forms.ToolStripMenuItem]$UserAccountCreatedToolStripMenuItem = $null
+[System.Windows.Forms.ToolStripMenuItem]$UserAccountEnabledToolStripMenuItem = $null
+[System.Windows.Forms.ToolStripMenuItem]$PasswordResetAttemptToolStripMenuItem = $null
+[System.Windows.Forms.ToolStripMenuItem]$GroupMembershipChangesToolStripMenuItem = $null
+[System.Windows.Forms.ToolStripMenuItem]$AccountLockoutToolStripMenuItem = $null
 [System.Windows.Forms.ToolStripMenuItem]$mnuEventClassesServices = $null
 [System.Windows.Forms.ToolStripMenuItem]$NewServiceInstalledToolStripMenuItem = $null
 [System.Windows.Forms.ToolStripMenuItem]$ServiceTerminatedUnexpectedlyToolStripMenuItem = $null
@@ -235,6 +241,12 @@ $HelpToolStripMenuItem1 = (New-Object -TypeName System.Windows.Forms.ToolStripMe
 $grpbxEventsOfInterest = (New-Object -TypeName System.Windows.Forms.GroupBox)
 $Control1 = (New-Object -TypeName System.Windows.Forms.Control)
 $lblEndDateTime = (New-Object -TypeName System.Windows.Forms.Label)
+$mnuEventClassesSecurity = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+$UserAccountCreatedToolStripMenuItem = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+$UserAccountEnabledToolStripMenuItem = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+$PasswordResetAttemptToolStripMenuItem = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+$GroupMembershipChangesToolStripMenuItem = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
+$AccountLockoutToolStripMenuItem = (New-Object -TypeName System.Windows.Forms.ToolStripMenuItem)
 ([System.ComponentModel.ISupportInitialize]$dgvEvents).BeginInit()
 ([System.ComponentModel.ISupportInitialize]$dgvLogsList).BeginInit()
 $grpbxLevel.SuspendLayout()
@@ -622,7 +634,7 @@ $LoadSettingsToolStripMenuItem.add_Click($mnuFileLoad_click)
 #
 #mnuEventClasses
 #
-$mnuEventClasses.DropDownItems.AddRange([System.Windows.Forms.ToolStripItem[]]@($FilterClasses,$mnuEventClassesAD,$mnuEventClassesApps,$mnuEventClassesAuthentication,$mnuEventClassesNetwork,$mnuEventClassesRDS,$mnuEventClassesServices,$mnuEventClassesSQL,$mnuEventClassesFirewall,$mnuEventClassesUpdate,$mnuEventClassesCrashes))
+$mnuEventClasses.DropDownItems.AddRange([System.Windows.Forms.ToolStripItem[]]@($FilterClasses,$mnuEventClassesAD,$mnuEventClassesApps,$mnuEventClassesAuthentication,$mnuEventClassesNetwork,$mnuEventClassesRDS,$mnuEventClassesSecurity,$mnuEventClassesServices,$mnuEventClassesSQL,$mnuEventClassesFirewall,$mnuEventClassesUpdate,$mnuEventClassesCrashes))
 $mnuEventClasses.Name = [System.String]'mnuEventClasses'
 $mnuEventClasses.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]108,[System.Int32]24))
 $mnuEventClasses.Text = [System.String]'Event Classes'
@@ -643,11 +655,12 @@ $mnuEventClassesAD.ToolTipText = [System.String]'1388,1988,2042 - Replication li
 1925,2087,2088 - replication DNS lookup problems
 1925 - replication connectivity problems
 1311 - replication topology problems'
-$mnuEventClassesAD.add_Click($mnuEventClassesAD_click)
+$mnuEventClassesAD.add_Click($mnuEventClasses_click)
 #
 #ADTopologyProblemsToolStripMenuItem
 #
 $ADTopologyProblemsToolStripMenuItem.Checked = $true
+$ADTopologyProblemsToolStripMenuItem.CheckOnClick = $true
 $ADTopologyProblemsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ADTopologyProblemsToolStripMenuItem.Name = [System.String]'ADTopologyProblemsToolStripMenuItem'
 $ADTopologyProblemsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]327,[System.Int32]24))
@@ -656,6 +669,7 @@ $ADTopologyProblemsToolStripMenuItem.Text = [System.String]'1311 - AD Topology P
 #LingeringObjectsToolStripMenuItem
 #
 $LingeringObjectsToolStripMenuItem.Checked = $true
+$LingeringObjectsToolStripMenuItem.CheckOnClick = $true
 $LingeringObjectsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $LingeringObjectsToolStripMenuItem.Name = [System.String]'LingeringObjectsToolStripMenuItem'
 $LingeringObjectsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]327,[System.Int32]24))
@@ -664,6 +678,7 @@ $LingeringObjectsToolStripMenuItem.Text = [System.String]'1388, 1988, 2042 - Lin
 #NoInboundNeighborsToolStripMenuItem
 #
 $NoInboundNeighborsToolStripMenuItem.Checked = $true
+$NoInboundNeighborsToolStripMenuItem.CheckOnClick = $true
 $NoInboundNeighborsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $NoInboundNeighborsToolStripMenuItem.Name = [System.String]'NoInboundNeighborsToolStripMenuItem'
 $NoInboundNeighborsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]327,[System.Int32]24))
@@ -672,6 +687,7 @@ $NoInboundNeighborsToolStripMenuItem.Text = [System.String]'1925 - No Inbound Ne
 #DNSLookupIssuesToolStripMenuItem
 #
 $DNSLookupIssuesToolStripMenuItem.Checked = $true
+$DNSLookupIssuesToolStripMenuItem.CheckOnClick = $true
 $DNSLookupIssuesToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DNSLookupIssuesToolStripMenuItem.Name = [System.String]'DNSLookupIssuesToolStripMenuItem'
 $DNSLookupIssuesToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]327,[System.Int32]24))
@@ -680,6 +696,7 @@ $DNSLookupIssuesToolStripMenuItem.Text = [System.String]'1925, 2087, 2088 - DNS 
 #DCFailedInboundReplicationToolStripMenuItem
 #
 $DCFailedInboundReplicationToolStripMenuItem.Checked = $true
+$DCFailedInboundReplicationToolStripMenuItem.CheckOnClick = $true
 $DCFailedInboundReplicationToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DCFailedInboundReplicationToolStripMenuItem.Name = [System.String]'DCFailedInboundReplicationToolStripMenuItem'
 $DCFailedInboundReplicationToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]327,[System.Int32]24))
@@ -693,27 +710,27 @@ $mnuEventClassesApps.Size = (New-Object -TypeName System.Drawing.Size -ArgumentL
 $mnuEventClassesApps.Text = [System.String]'Applications'
 $mnuEventClassesApps.ToolTipText = [System.String]'1000 - Application error
 1002 - Application hang'
-$mnuEventClassesApps.add_Click($mnuEventClassesApps_click)
+$mnuEventClassesApps.add_Click($mnuEventClasses_click)
 #
 #mnuEventClassesAppsIds0
 #
 $mnuEventClassesAppsIds0.Checked = $true
+$mnuEventClassesAppsIds0.CheckOnClick = $true
 $mnuEventClassesAppsIds0.CheckState = [System.Windows.Forms.CheckState]::Checked
 $mnuEventClassesAppsIds0.Name = [System.String]'mnuEventClassesAppsIds0'
 $mnuEventClassesAppsIds0.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]241,[System.Int32]24))
 $mnuEventClassesAppsIds0.Tag = [System.String]'Application:1000'
 $mnuEventClassesAppsIds0.Text = [System.String]'1000 - Application Error'
-$mnuEventClassesAppsIds0.add_Click($mnuEventClassesAppsIds0_click)
 #
 #mnuEventClassesAppsIds1
 #
 $mnuEventClassesAppsIds1.Checked = $true
+$mnuEventClassesAppsIds1.CheckOnClick = $true
 $mnuEventClassesAppsIds1.CheckState = [System.Windows.Forms.CheckState]::Checked
 $mnuEventClassesAppsIds1.Name = [System.String]'mnuEventClassesAppsIds1'
 $mnuEventClassesAppsIds1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]241,[System.Int32]24))
 $mnuEventClassesAppsIds1.Tag = [System.String]'Application:1002'
 $mnuEventClassesAppsIds1.Text = [System.String]'1002 - Application Hang'
-$mnuEventClassesAppsIds1.add_Click($mnuEventClassesAppsIds1_click)
 #
 #mnuEventClassesAuthentication
 #
@@ -722,11 +739,12 @@ $mnuEventClassesAuthentication.Name = [System.String]'mnuEventClassesAuthenticat
 $mnuEventClassesAuthentication.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesAuthentication.Text = [System.String]'Authentication'
 $mnuEventClassesAuthentication.ToolTipText = [System.String]'4776 - DC attempted to validate credentials'
-$mnuEventClassesAuthentication.add_Click($mnuEventClassesAuthentication_click)
+$mnuEventClassesAuthentication.add_Click($mnuEventClasses_click)
 #
 #DCAttemptedToValidateCredentialsToolStripMenuItem
 #
 $DCAttemptedToValidateCredentialsToolStripMenuItem.Checked = $true
+$DCAttemptedToValidateCredentialsToolStripMenuItem.CheckOnClick = $true
 $DCAttemptedToValidateCredentialsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DCAttemptedToValidateCredentialsToolStripMenuItem.Name = [System.String]'DCAttemptedToValidateCredentialsToolStripMenuItem'
 $DCAttemptedToValidateCredentialsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
@@ -735,6 +753,7 @@ $DCAttemptedToValidateCredentialsToolStripMenuItem.Text = [System.String]'DC Att
 #KerberosPreAuthenticationFailedToolStripMenuItem
 #
 $KerberosPreAuthenticationFailedToolStripMenuItem.Checked = $true
+$KerberosPreAuthenticationFailedToolStripMenuItem.CheckOnClick = $true
 $KerberosPreAuthenticationFailedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosPreAuthenticationFailedToolStripMenuItem.Name = [System.String]'KerberosPreAuthenticationFailedToolStripMenuItem'
 $KerberosPreAuthenticationFailedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
@@ -743,6 +762,7 @@ $KerberosPreAuthenticationFailedToolStripMenuItem.Text = [System.String]'4771 Ke
 #KerberosTicketRequestedFailOrSuccessToolStripMenuItem
 #
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Checked = $true
+$KerberosTicketRequestedFailOrSuccessToolStripMenuItem.CheckOnClick = $true
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Name = [System.String]'KerberosTicketRequestedFailOrSuccessToolStripMenuItem'
 $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
@@ -751,6 +771,7 @@ $KerberosTicketRequestedFailOrSuccessToolStripMenuItem.Text = [System.String]'47
 #KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem
 #
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Checked = $true
+$KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.CheckOnClick = $true
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Name = [System.String]'KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem'
 $KerberosServiceTicketRequestedFailOrSuccessToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]459,[System.Int32]24))
@@ -762,11 +783,12 @@ $mnuEventClassesNetwork.DropDownItems.AddRange([System.Windows.Forms.ToolStripIt
 $mnuEventClassesNetwork.Name = [System.String]'mnuEventClassesNetwork'
 $mnuEventClassesNetwork.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesNetwork.Text = [System.String]'Network'
-$mnuEventClassesNetwork.add_Click($mnuEventClassesNetwork_click)
+$mnuEventClassesNetwork.add_Click($mnuEventClasses_click)
 #
 #ToolStripMenuItem2
 #
 $ToolStripMenuItem2.Checked = $true
+$ToolStripMenuItem2.CheckOnClick = $true
 $ToolStripMenuItem2.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ToolStripMenuItem2.Name = [System.String]'ToolStripMenuItem2'
 $ToolStripMenuItem2.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -775,6 +797,7 @@ $ToolStripMenuItem2.Text = [System.String]'21 - '
 #WindowsSocketsErrorToolStripMenuItem
 #
 $WindowsSocketsErrorToolStripMenuItem.Checked = $true
+$WindowsSocketsErrorToolStripMenuItem.CheckOnClick = $true
 $WindowsSocketsErrorToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsSocketsErrorToolStripMenuItem.Name = [System.String]'WindowsSocketsErrorToolStripMenuItem'
 $WindowsSocketsErrorToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -783,6 +806,7 @@ $WindowsSocketsErrorToolStripMenuItem.Text = [System.String]'22, 23 - Windows So
 #ErrorApplyingSecurityPolicyToolStripMenuItem
 #
 $ErrorApplyingSecurityPolicyToolStripMenuItem.Checked = $true
+$ErrorApplyingSecurityPolicyToolStripMenuItem.CheckOnClick = $true
 $ErrorApplyingSecurityPolicyToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ErrorApplyingSecurityPolicyToolStripMenuItem.Name = [System.String]'ErrorApplyingSecurityPolicyToolStripMenuItem'
 $ErrorApplyingSecurityPolicyToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -791,6 +815,7 @@ $ErrorApplyingSecurityPolicyToolStripMenuItem.Text = [System.String]'40 - Error 
 #NetworkConnectivityToolStripMenuItem
 #
 $NetworkConnectivityToolStripMenuItem.Checked = $true
+$NetworkConnectivityToolStripMenuItem.CheckOnClick = $true
 $NetworkConnectivityToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $NetworkConnectivityToolStripMenuItem.Name = [System.String]'NetworkConnectivityToolStripMenuItem'
 $NetworkConnectivityToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -799,6 +824,7 @@ $NetworkConnectivityToolStripMenuItem.Text = [System.String]'2012 - Network Conn
 #WINSErrorsToolStripMenuItem
 #
 $WINSErrorsToolStripMenuItem.Checked = $true
+$WINSErrorsToolStripMenuItem.CheckOnClick = $true
 $WINSErrorsToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WINSErrorsToolStripMenuItem.Name = [System.String]'WINSErrorsToolStripMenuItem'
 $WINSErrorsToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -807,6 +833,7 @@ $WINSErrorsToolStripMenuItem.Text = [System.String]'4102, 4242, 4243, 4286 - WIN
 #DomainControllerNotResponsiveToolStripMenuItem
 #
 $DomainControllerNotResponsiveToolStripMenuItem.Checked = $true
+$DomainControllerNotResponsiveToolStripMenuItem.CheckOnClick = $true
 $DomainControllerNotResponsiveToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DomainControllerNotResponsiveToolStripMenuItem.Name = [System.String]'DomainControllerNotResponsiveToolStripMenuItem'
 $DomainControllerNotResponsiveToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]354,[System.Int32]24))
@@ -823,11 +850,12 @@ ID 106 - user registers scheduled task
 ID 4702 - Scheduled task updated
 ID 4699 - A Scheduled Task was deleted
 ID 201 - Task scheduler successfully completed task'
-$mnuEventClassesRDS.add_Click($mnuEventClassesRDS_click)
+$mnuEventClassesRDS.add_Click($mnuEventClasses_click)
 #
 #RDSSessionHostListeningAvailabilityToolStripMenuItem
 #
 $RDSSessionHostListeningAvailabilityToolStripMenuItem.Checked = $true
+$RDSSessionHostListeningAvailabilityToolStripMenuItem.CheckOnClick = $true
 $RDSSessionHostListeningAvailabilityToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RDSSessionHostListeningAvailabilityToolStripMenuItem.Name = [System.String]'RDSSessionHostListeningAvailabilityToolStripMenuItem'
 $RDSSessionHostListeningAvailabilityToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]426,[System.Int32]24))
@@ -836,6 +864,7 @@ $RDSSessionHostListeningAvailabilityToolStripMenuItem.Text = [System.String]'261
 #RDPClientActiveXIsTryingToConnectToolStripMenuItem
 #
 $RDPClientActiveXIsTryingToConnectToolStripMenuItem.Checked = $true
+$RDPClientActiveXIsTryingToConnectToolStripMenuItem.CheckOnClick = $true
 $RDPClientActiveXIsTryingToConnectToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RDPClientActiveXIsTryingToConnectToolStripMenuItem.Name = [System.String]'RDPClientActiveXIsTryingToConnectToolStripMenuItem'
 $RDPClientActiveXIsTryingToConnectToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]426,[System.Int32]24))
@@ -844,6 +873,7 @@ $RDPClientActiveXIsTryingToConnectToolStripMenuItem.Text = [System.String]'1024 
 #RDSConnectionBrokerCommunicationToolStripMenuItem
 #
 $RDSConnectionBrokerCommunicationToolStripMenuItem.Checked = $true
+$RDSConnectionBrokerCommunicationToolStripMenuItem.CheckOnClick = $true
 $RDSConnectionBrokerCommunicationToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RDSConnectionBrokerCommunicationToolStripMenuItem.Name = [System.String]'RDSConnectionBrokerCommunicationToolStripMenuItem'
 $RDSConnectionBrokerCommunicationToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]426,[System.Int32]24))
@@ -852,6 +882,7 @@ $RDSConnectionBrokerCommunicationToolStripMenuItem.Text = [System.String]'1301, 
 #FailedToStartSessionMonitoringToolStripMenuItem
 #
 $FailedToStartSessionMonitoringToolStripMenuItem.Checked = $true
+$FailedToStartSessionMonitoringToolStripMenuItem.CheckOnClick = $true
 $FailedToStartSessionMonitoringToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $FailedToStartSessionMonitoringToolStripMenuItem.Name = [System.String]'FailedToStartSessionMonitoringToolStripMenuItem'
 $FailedToStartSessionMonitoringToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]426,[System.Int32]24))
@@ -863,11 +894,12 @@ $mnuEventClassesServices.DropDownItems.AddRange([System.Windows.Forms.ToolStripI
 $mnuEventClassesServices.Name = [System.String]'mnuEventClassesServices'
 $mnuEventClassesServices.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesServices.Text = [System.String]'Services'
-$mnuEventClassesServices.add_Click($mnuEventClassesServices_click)
+$mnuEventClassesServices.add_Click($mnuEventClasses_click)
 #
 #NewServiceInstalledToolStripMenuItem
 #
 $NewServiceInstalledToolStripMenuItem.Checked = $true
+$NewServiceInstalledToolStripMenuItem.CheckOnClick = $true
 $NewServiceInstalledToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $NewServiceInstalledToolStripMenuItem.Name = [System.String]'NewServiceInstalledToolStripMenuItem'
 $NewServiceInstalledToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]379,[System.Int32]24))
@@ -876,6 +908,7 @@ $NewServiceInstalledToolStripMenuItem.Text = [System.String]'4697 - New Service 
 #ServiceTerminatedUnexpectedlyToolStripMenuItem
 #
 $ServiceTerminatedUnexpectedlyToolStripMenuItem.Checked = $true
+$ServiceTerminatedUnexpectedlyToolStripMenuItem.CheckOnClick = $true
 $ServiceTerminatedUnexpectedlyToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ServiceTerminatedUnexpectedlyToolStripMenuItem.Name = [System.String]'ServiceTerminatedUnexpectedlyToolStripMenuItem'
 $ServiceTerminatedUnexpectedlyToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]379,[System.Int32]24))
@@ -884,6 +917,7 @@ $ServiceTerminatedUnexpectedlyToolStripMenuItem.Text = [System.String]'7034 - Se
 #WindowsFirewallICSServiceStoppedToolStripMenuItem
 #
 $WindowsFirewallICSServiceStoppedToolStripMenuItem.Checked = $true
+$WindowsFirewallICSServiceStoppedToolStripMenuItem.CheckOnClick = $true
 $WindowsFirewallICSServiceStoppedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsFirewallICSServiceStoppedToolStripMenuItem.Name = [System.String]'WindowsFirewallICSServiceStoppedToolStripMenuItem'
 $WindowsFirewallICSServiceStoppedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]379,[System.Int32]24))
@@ -892,6 +926,7 @@ $WindowsFirewallICSServiceStoppedToolStripMenuItem.Text = [System.String]'7036 -
 #NewServicesCreatedToolStripMenuItem
 #
 $NewServicesCreatedToolStripMenuItem.Checked = $true
+$NewServicesCreatedToolStripMenuItem.CheckOnClick = $true
 $NewServicesCreatedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $NewServicesCreatedToolStripMenuItem.Name = [System.String]'NewServicesCreatedToolStripMenuItem'
 $NewServicesCreatedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]379,[System.Int32]24))
@@ -903,11 +938,12 @@ $mnuEventClassesSQL.DropDownItems.AddRange([System.Windows.Forms.ToolStripItem[]
 $mnuEventClassesSQL.Name = [System.String]'mnuEventClassesSQL'
 $mnuEventClassesSQL.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesSQL.Text = [System.String]'SQL Server'
-$mnuEventClassesSQL.add_Click($mnuEventClassesSQL_click)
+$mnuEventClassesSQL.add_Click($mnuEventClasses_click)
 #
 #CoudntAllocateSpaceToolStripMenuItem
 #
 $CoudntAllocateSpaceToolStripMenuItem.Checked = $true
+$CoudntAllocateSpaceToolStripMenuItem.CheckOnClick = $true
 $CoudntAllocateSpaceToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $CoudntAllocateSpaceToolStripMenuItem.Name = [System.String]'CoudntAllocateSpaceToolStripMenuItem'
 $CoudntAllocateSpaceToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -916,6 +952,7 @@ $CoudntAllocateSpaceToolStripMenuItem.Text = [System.String]'1105 - Coudn''t All
 #BackupFailedToolStripMenuItem
 #
 $BackupFailedToolStripMenuItem.Checked = $true
+$BackupFailedToolStripMenuItem.CheckOnClick = $true
 $BackupFailedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $BackupFailedToolStripMenuItem.Name = [System.String]'BackupFailedToolStripMenuItem'
 $BackupFailedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -924,6 +961,7 @@ $BackupFailedToolStripMenuItem.Text = [System.String]'3041 - Backup Failed'
 #SQLServerStoppedToolStripMenuItem
 #
 $SQLServerStoppedToolStripMenuItem.Checked = $true
+$SQLServerStoppedToolStripMenuItem.CheckOnClick = $true
 $SQLServerStoppedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SQLServerStoppedToolStripMenuItem.Name = [System.String]'SQLServerStoppedToolStripMenuItem'
 $SQLServerStoppedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -932,6 +970,7 @@ $SQLServerStoppedToolStripMenuItem.Text = [System.String]'7036 SQL Server Stoppe
 #TransactionLogFullToolStripMenuItem
 #
 $TransactionLogFullToolStripMenuItem.Checked = $true
+$TransactionLogFullToolStripMenuItem.CheckOnClick = $true
 $TransactionLogFullToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $TransactionLogFullToolStripMenuItem.Name = [System.String]'TransactionLogFullToolStripMenuItem'
 $TransactionLogFullToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -940,6 +979,7 @@ $TransactionLogFullToolStripMenuItem.Text = [System.String]'9002 - Transaction L
 #LogScanNumberInvalidToolStripMenuItem
 #
 $LogScanNumberInvalidToolStripMenuItem.Checked = $true
+$LogScanNumberInvalidToolStripMenuItem.CheckOnClick = $true
 $LogScanNumberInvalidToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $LogScanNumberInvalidToolStripMenuItem.Name = [System.String]'LogScanNumberInvalidToolStripMenuItem'
 $LogScanNumberInvalidToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -948,6 +988,7 @@ $LogScanNumberInvalidToolStripMenuItem.Text = [System.String]'9003 - Log Scan Nu
 #ReplicationAgentFailedToolStripMenuItem
 #
 $ReplicationAgentFailedToolStripMenuItem.Checked = $true
+$ReplicationAgentFailedToolStripMenuItem.CheckOnClick = $true
 $ReplicationAgentFailedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ReplicationAgentFailedToolStripMenuItem.Name = [System.String]'ReplicationAgentFailedToolStripMenuItem'
 $ReplicationAgentFailedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -956,6 +997,7 @@ $ReplicationAgentFailedToolStripMenuItem.Text = [System.String]'14151 - Replicat
 #ConfigurationOptionAgentXPsChangedToolStripMenuItem
 #
 $ConfigurationOptionAgentXPsChangedToolStripMenuItem.Checked = $true
+$ConfigurationOptionAgentXPsChangedToolStripMenuItem.CheckOnClick = $true
 $ConfigurationOptionAgentXPsChangedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ConfigurationOptionAgentXPsChangedToolStripMenuItem.Name = [System.String]'ConfigurationOptionAgentXPsChangedToolStripMenuItem'
 $ConfigurationOptionAgentXPsChangedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -964,6 +1006,7 @@ $ConfigurationOptionAgentXPsChangedToolStripMenuItem.Text = [System.String]'1545
 #FileOpenErrorToolStripMenuItem
 #
 $FileOpenErrorToolStripMenuItem.Checked = $true
+$FileOpenErrorToolStripMenuItem.CheckOnClick = $true
 $FileOpenErrorToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $FileOpenErrorToolStripMenuItem.Name = [System.String]'FileOpenErrorToolStripMenuItem'
 $FileOpenErrorToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -972,6 +1015,7 @@ $FileOpenErrorToolStripMenuItem.Text = [System.String]'17113 - File Open Error'
 #SQLServerTerminatingDueToStopRequestToolStripMenuItem
 #
 $SQLServerTerminatingDueToStopRequestToolStripMenuItem.Checked = $true
+$SQLServerTerminatingDueToStopRequestToolStripMenuItem.CheckOnClick = $true
 $SQLServerTerminatingDueToStopRequestToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SQLServerTerminatingDueToStopRequestToolStripMenuItem.Name = [System.String]'SQLServerTerminatingDueToStopRequestToolStripMenuItem'
 $SQLServerTerminatingDueToStopRequestToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -980,6 +1024,7 @@ $SQLServerTerminatingDueToStopRequestToolStripMenuItem.Text = [System.String]'17
 #OperatingSystemErrorToolStripMenuItem
 #
 $OperatingSystemErrorToolStripMenuItem.Checked = $true
+$OperatingSystemErrorToolStripMenuItem.CheckOnClick = $true
 $OperatingSystemErrorToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $OperatingSystemErrorToolStripMenuItem.Name = [System.String]'OperatingSystemErrorToolStripMenuItem'
 $OperatingSystemErrorToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -988,6 +1033,7 @@ $OperatingSystemErrorToolStripMenuItem.Text = [System.String]'17207 Operating Sy
 #LoginFailedToolStripMenuItem
 #
 $LoginFailedToolStripMenuItem.Checked = $true
+$LoginFailedToolStripMenuItem.CheckOnClick = $true
 $LoginFailedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $LoginFailedToolStripMenuItem.Name = [System.String]'LoginFailedToolStripMenuItem'
 $LoginFailedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -996,6 +1042,7 @@ $LoginFailedToolStripMenuItem.Text = [System.String]'18452, 18456 - Login Failed
 #CouldntConnectToServerToolStripMenuItem
 #
 $CouldntConnectToServerToolStripMenuItem.Checked = $true
+$CouldntConnectToServerToolStripMenuItem.CheckOnClick = $true
 $CouldntConnectToServerToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $CouldntConnectToServerToolStripMenuItem.Name = [System.String]'CouldntConnectToServerToolStripMenuItem'
 $CouldntConnectToServerToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]429,[System.Int32]24))
@@ -1007,94 +1054,116 @@ $mnuEventClassesFirewall.DropDownItems.AddRange([System.Windows.Forms.ToolStripI
 $mnuEventClassesFirewall.Name = [System.String]'mnuEventClassesFirewall'
 $mnuEventClassesFirewall.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesFirewall.Text = [System.String]'Windows Firewall'
-$mnuEventClassesFirewall.add_Click($mnuEventClassesWindowsFirewall_click)
+$mnuEventClassesFirewall.add_Click($mnuEventClasses_click)
 #
 #RuleAddedToFirewallToolStripMenuItem
 #
 $RuleAddedToFirewallToolStripMenuItem.Checked = $true
+$RuleAddedToFirewallToolStripMenuItem.CheckOnClick = $true
 $RuleAddedToFirewallToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RuleAddedToFirewallToolStripMenuItem.Name = [System.String]'RuleAddedToFirewallToolStripMenuItem'
 $RuleAddedToFirewallToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$RuleAddedToFirewallToolStripMenuItem.Tag = [System.String]'Security:4946'
 $RuleAddedToFirewallToolStripMenuItem.Text = [System.String]'4946 - Rule Added to Firewall'
 #
 #RuleModifiedOnFirewallToolStripMenuItem
 #
 $RuleModifiedOnFirewallToolStripMenuItem.Checked = $true
+$RuleModifiedOnFirewallToolStripMenuItem.CheckOnClick = $true
 $RuleModifiedOnFirewallToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RuleModifiedOnFirewallToolStripMenuItem.Name = [System.String]'RuleModifiedOnFirewallToolStripMenuItem'
 $RuleModifiedOnFirewallToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$RuleModifiedOnFirewallToolStripMenuItem.Tag = [System.String]'Security:4947'
 $RuleModifiedOnFirewallToolStripMenuItem.Text = [System.String]'4947 - Rule Modified on Firewall'
 #
 #SettingChangedOnFirewallToolStripMenuItem
 #
 $SettingChangedOnFirewallToolStripMenuItem.Checked = $true
+$SettingChangedOnFirewallToolStripMenuItem.CheckOnClick = $true
 $SettingChangedOnFirewallToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SettingChangedOnFirewallToolStripMenuItem.Name = [System.String]'SettingChangedOnFirewallToolStripMenuItem'
 $SettingChangedOnFirewallToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$SettingChangedOnFirewallToolStripMenuItem.Tag = [System.String]'Security:4950'
 $SettingChangedOnFirewallToolStripMenuItem.Text = [System.String]'4950 - Setting Changed on Firewall'
 #
 #GroupPolicySettingForFirewallChangedToolStripMenuItem
 #
 $GroupPolicySettingForFirewallChangedToolStripMenuItem.Checked = $true
+$GroupPolicySettingForFirewallChangedToolStripMenuItem.CheckOnClick = $true
 $GroupPolicySettingForFirewallChangedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $GroupPolicySettingForFirewallChangedToolStripMenuItem.Name = [System.String]'GroupPolicySettingForFirewallChangedToolStripMenuItem'
 $GroupPolicySettingForFirewallChangedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$GroupPolicySettingForFirewallChangedToolStripMenuItem.Tag = [System.String]'Security:4954'
 $GroupPolicySettingForFirewallChangedToolStripMenuItem.Text = [System.String]'4954 - Group Policy Setting for Firewall Changed'
 #
 #WindowsFirewallServiceStoppedToolStripMenuItem
 #
 $WindowsFirewallServiceStoppedToolStripMenuItem.Checked = $true
+$WindowsFirewallServiceStoppedToolStripMenuItem.CheckOnClick = $true
 $WindowsFirewallServiceStoppedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsFirewallServiceStoppedToolStripMenuItem.Name = [System.String]'WindowsFirewallServiceStoppedToolStripMenuItem'
 $WindowsFirewallServiceStoppedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$WindowsFirewallServiceStoppedToolStripMenuItem.Tag = [System.String]'Security:5025'
 $WindowsFirewallServiceStoppedToolStripMenuItem.Text = [System.String]'5025 - Windows Firewall Service Stopped'
 #
 #FirewallBlockedAppToolStripMenuItem
 #
 $FirewallBlockedAppToolStripMenuItem.Checked = $true
+$FirewallBlockedAppToolStripMenuItem.CheckOnClick = $true
 $FirewallBlockedAppToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $FirewallBlockedAppToolStripMenuItem.Name = [System.String]'FirewallBlockedAppToolStripMenuItem'
 $FirewallBlockedAppToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$FirewallBlockedAppToolStripMenuItem.Tag = [System.String]'Security:5031'
 $FirewallBlockedAppToolStripMenuItem.Text = [System.String]'5031 - Firewall Blocked App'
 #
 #NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem
 #
 $NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.Checked = $true
+$NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.CheckOnClick = $true
 $NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.Name = [System.String]'NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem'
 $NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.Tag = [System.String]'Security:5152,5153'
 $NetworkPacketBlcokedByWindowsFilteringToolStripMenuItem.Text = [System.String]'5152, 5153 - Network Packet Blcoked by Windows Filtering'
 #
 #AppOrServiceBlockedByWindowsFilteringToolStripMenuItem
 #
 $AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.Checked = $true
+$AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.CheckOnClick = $true
 $AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.Name = [System.String]'AppOrServiceBlockedByWindowsFilteringToolStripMenuItem'
 $AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.Tag = [System.String]'Security:5155'
 $AppOrServiceBlockedByWindowsFilteringToolStripMenuItem.Text = [System.String]'5155 - App or Service Blocked by Windows Filtering'
 #
 #ConnectionBlockedByWindowsFilteringToolStripMenuItem
 #
 $ConnectionBlockedByWindowsFilteringToolStripMenuItem.Checked = $true
+$ConnectionBlockedByWindowsFilteringToolStripMenuItem.CheckOnClick = $true
 $ConnectionBlockedByWindowsFilteringToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ConnectionBlockedByWindowsFilteringToolStripMenuItem.Name = [System.String]'ConnectionBlockedByWindowsFilteringToolStripMenuItem'
 $ConnectionBlockedByWindowsFilteringToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$ConnectionBlockedByWindowsFilteringToolStripMenuItem.Tag = [System.String]'Security:5157'
 $ConnectionBlockedByWindowsFilteringToolStripMenuItem.Text = [System.String]'5157 - Connection Blocked by Windows Filtering'
 #
 #WindowsFilteringFilterChangedToolStripMenuItem
 #
 $WindowsFilteringFilterChangedToolStripMenuItem.Checked = $true
+$WindowsFilteringFilterChangedToolStripMenuItem.CheckOnClick = $true
 $WindowsFilteringFilterChangedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsFilteringFilterChangedToolStripMenuItem.Name = [System.String]'WindowsFilteringFilterChangedToolStripMenuItem'
 $WindowsFilteringFilterChangedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$WindowsFilteringFilterChangedToolStripMenuItem.Tag = [System.String]'Security:5447'
 $WindowsFilteringFilterChangedToolStripMenuItem.Text = [System.String]'5447 - Windows Filtering Filter Changed'
 #
 #WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem
 #
 $WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.Checked = $true
+$WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.CheckOnClick = $true
 $WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.Name = [System.String]'WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem'
 $WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]549,[System.Int32]24))
+$WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.Tag = [System.String]'Security:7036'
 $WindowsFirewallICSServiceStoppedorPrintSpoolerToolStripMenuItem.Text = [System.String]'7036 - Windows Firewall/ICS Service Stopped (or Print Spooler Started)'
 #
 #mnuEventClassesUpdate
@@ -1103,51 +1172,62 @@ $mnuEventClassesUpdate.DropDownItems.AddRange([System.Windows.Forms.ToolStripIte
 $mnuEventClassesUpdate.Name = [System.String]'mnuEventClassesUpdate'
 $mnuEventClassesUpdate.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
 $mnuEventClassesUpdate.Text = [System.String]'Windows Update'
-$mnuEventClassesUpdate.add_Click($mnuWindowsUpdates_click)
+$mnuEventClassesUpdate.add_Click($mnuEventClasses_click)
 #
 #AUClientCouldntContactWSUSServerToolStripMenuItem
 #
 $AUClientCouldntContactWSUSServerToolStripMenuItem.Checked = $true
+$AUClientCouldntContactWSUSServerToolStripMenuItem.CheckOnClick = $true
 $AUClientCouldntContactWSUSServerToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $AUClientCouldntContactWSUSServerToolStripMenuItem.Name = [System.String]'AUClientCouldntContactWSUSServerToolStripMenuItem'
 $AUClientCouldntContactWSUSServerToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
+$AUClientCouldntContactWSUSServerToolStripMenuItem.Tag = [System.String]'System:16'
 $AUClientCouldntContactWSUSServerToolStripMenuItem.Text = [System.String]'16 - AU Client Couldn''t Contact WSUS Server'
 #
 #WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem
 #
 $WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.Checked = $true
+$WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.CheckOnClick = $true
 $WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.Name = [System.String]'WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem'
 $WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
+$WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.Tag = [System.String]'System:19'
 $WindowsSuccessfullyDownloadedUpdatesToolStripMenuItem.Text = [System.String]'19 - Windows Successfully Downloaded Updates'
 #
 #RebootRequiredToolStripMenuItem
 #
 $RebootRequiredToolStripMenuItem.Checked = $true
+$RebootRequiredToolStripMenuItem.CheckOnClick = $true
 $RebootRequiredToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $RebootRequiredToolStripMenuItem.Name = [System.String]'RebootRequiredToolStripMenuItem'
 $RebootRequiredToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
+$RebootRequiredToolStripMenuItem.Tag = [System.String]'System:20'
 $RebootRequiredToolStripMenuItem.Text = [System.String]'20 - Reboot Required'
 #
 #ComputerNotSetToRebootToolStripMenuItem
 #
 $ComputerNotSetToRebootToolStripMenuItem.Checked = $true
+$ComputerNotSetToRebootToolStripMenuItem.CheckOnClick = $true
 $ComputerNotSetToRebootToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $ComputerNotSetToRebootToolStripMenuItem.Name = [System.String]'ComputerNotSetToRebootToolStripMenuItem'
 $ComputerNotSetToRebootToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
+$ComputerNotSetToRebootToolStripMenuItem.Tag = [System.String]'System:21'
 $ComputerNotSetToRebootToolStripMenuItem.Text = [System.String]'21 - Computer Not Set To Reboot'
 #
 #SuccessfullInstallationRequiringRebootToolStripMenuItem
 #
 $SuccessfullInstallationRequiringRebootToolStripMenuItem.Checked = $true
+$SuccessfullInstallationRequiringRebootToolStripMenuItem.CheckOnClick = $true
 $SuccessfullInstallationRequiringRebootToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SuccessfullInstallationRequiringRebootToolStripMenuItem.Name = [System.String]'SuccessfullInstallationRequiringRebootToolStripMenuItem'
 $SuccessfullInstallationRequiringRebootToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
+$SuccessfullInstallationRequiringRebootToolStripMenuItem.Tag = [System.String]'System:22'
 $SuccessfullInstallationRequiringRebootToolStripMenuItem.Text = [System.String]'22 - Successfull Installation Requiring Reboot'
 #
 #MicrosoftHotfixesSPsInstalledToolStripMenuItem
 #
 $MicrosoftHotfixesSPsInstalledToolStripMenuItem.Checked = $true
+$MicrosoftHotfixesSPsInstalledToolStripMenuItem.CheckOnClick = $true
 $MicrosoftHotfixesSPsInstalledToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $MicrosoftHotfixesSPsInstalledToolStripMenuItem.Name = [System.String]'MicrosoftHotfixesSPsInstalledToolStripMenuItem'
 $MicrosoftHotfixesSPsInstalledToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
@@ -1156,6 +1236,7 @@ $MicrosoftHotfixesSPsInstalledToolStripMenuItem.Text = [System.String]'4363 - Mi
 #FailedInstallationWithWarningStateToolStripMenuItem
 #
 $FailedInstallationWithWarningStateToolStripMenuItem.Checked = $true
+$FailedInstallationWithWarningStateToolStripMenuItem.CheckOnClick = $true
 $FailedInstallationWithWarningStateToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $FailedInstallationWithWarningStateToolStripMenuItem.Name = [System.String]'FailedInstallationWithWarningStateToolStripMenuItem'
 $FailedInstallationWithWarningStateToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
@@ -1164,6 +1245,7 @@ $FailedInstallationWithWarningStateToolStripMenuItem.Text = [System.String]'4367
 #SignatureWasntPresentForHotfixToolStripMenuItem
 #
 $SignatureWasntPresentForHotfixToolStripMenuItem.Checked = $true
+$SignatureWasntPresentForHotfixToolStripMenuItem.CheckOnClick = $true
 $SignatureWasntPresentForHotfixToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SignatureWasntPresentForHotfixToolStripMenuItem.Name = [System.String]'SignatureWasntPresentForHotfixToolStripMenuItem'
 $SignatureWasntPresentForHotfixToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
@@ -1172,6 +1254,7 @@ $SignatureWasntPresentForHotfixToolStripMenuItem.Text = [System.String]'4373 - S
 #SuccessfulHotfixInstallationToolStripMenuItem
 #
 $SuccessfulHotfixInstallationToolStripMenuItem.Checked = $true
+$SuccessfulHotfixInstallationToolStripMenuItem.CheckOnClick = $true
 $SuccessfulHotfixInstallationToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SuccessfulHotfixInstallationToolStripMenuItem.Name = [System.String]'SuccessfulHotfixInstallationToolStripMenuItem'
 $SuccessfulHotfixInstallationToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]400,[System.Int32]24))
@@ -1188,7 +1271,7 @@ $mnuEventClassesCrashes.ToolTipText = [System.String]'1001 BSOD
 1074 User or app initiated restart
 6006 Clean shutodwn
 6008 Dirty shutdown'
-$mnuEventClassesCrashes.add_Click($mnuEventClassesCrashes_click)
+$mnuEventClassesCrashes.add_Click($mnuEventClasses_click)
 #
 #SystemRebootedWithoutCleanShutdownToolStripMenuItem
 #
@@ -1196,6 +1279,7 @@ $SystemRebootedWithoutCleanShutdownToolStripMenuItem.Checked = $true
 $SystemRebootedWithoutCleanShutdownToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $SystemRebootedWithoutCleanShutdownToolStripMenuItem.Name = [System.String]'SystemRebootedWithoutCleanShutdownToolStripMenuItem'
 $SystemRebootedWithoutCleanShutdownToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]393,[System.Int32]24))
+$SystemRebootedWithoutCleanShutdownToolStripMenuItem.Tag = [System.String]'System:41'
 $SystemRebootedWithoutCleanShutdownToolStripMenuItem.Text = [System.String]'41 - System Rebooted Without Clean Shutdown'
 #
 #BSODToolStripMenuItem
@@ -1204,6 +1288,7 @@ $BSODToolStripMenuItem.Checked = $true
 $BSODToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $BSODToolStripMenuItem.Name = [System.String]'BSODToolStripMenuItem'
 $BSODToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]393,[System.Int32]24))
+$BSODToolStripMenuItem.Tag = [System.String]'System:1001'
 $BSODToolStripMenuItem.Text = [System.String]'1001 - BSOD'
 #
 #UserOrAppInitiatedRestartToolStripMenuItem
@@ -1212,6 +1297,7 @@ $UserOrAppInitiatedRestartToolStripMenuItem.Checked = $true
 $UserOrAppInitiatedRestartToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $UserOrAppInitiatedRestartToolStripMenuItem.Name = [System.String]'UserOrAppInitiatedRestartToolStripMenuItem'
 $UserOrAppInitiatedRestartToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]393,[System.Int32]24))
+$UserOrAppInitiatedRestartToolStripMenuItem.Tag = [System.String]'System:1074'
 $UserOrAppInitiatedRestartToolStripMenuItem.Text = [System.String]'1074 - User or App Initiated Restart'
 #
 #CleanShutdownToolStripMenuItem
@@ -1220,6 +1306,7 @@ $CleanShutdownToolStripMenuItem.Checked = $true
 $CleanShutdownToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $CleanShutdownToolStripMenuItem.Name = [System.String]'CleanShutdownToolStripMenuItem'
 $CleanShutdownToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]393,[System.Int32]24))
+$CleanShutdownToolStripMenuItem.Tag = [System.String]'System:6006'
 $CleanShutdownToolStripMenuItem.Text = [System.String]'6006 - Clean Shutdown'
 #
 #DirtyShutdownToolStripMenuItem
@@ -1228,6 +1315,7 @@ $DirtyShutdownToolStripMenuItem.Checked = $true
 $DirtyShutdownToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
 $DirtyShutdownToolStripMenuItem.Name = [System.String]'DirtyShutdownToolStripMenuItem'
 $DirtyShutdownToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]393,[System.Int32]24))
+$DirtyShutdownToolStripMenuItem.Tag = [System.String]'System:6008'
 $DirtyShutdownToolStripMenuItem.Text = [System.String]'6008 - Dirty Shutdown'
 #
 #mnuHelp
@@ -1276,6 +1364,64 @@ $lblEndDateTime.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @
 $lblEndDateTime.TabIndex = [System.Int32]25
 $lblEndDateTime.Text = [System.String]'End Time'
 $lblEndDateTime.TextAlign = [System.Drawing.ContentAlignment]::BottomRight
+#
+#mnuEventClassesSecurity
+#
+$mnuEventClassesSecurity.DropDownItems.AddRange([System.Windows.Forms.ToolStripItem[]]@($UserAccountCreatedToolStripMenuItem,$UserAccountEnabledToolStripMenuItem,$PasswordResetAttemptToolStripMenuItem,$GroupMembershipChangesToolStripMenuItem,$AccountLockoutToolStripMenuItem))
+$mnuEventClassesSecurity.Name = [System.String]'mnuEventClassesSecurity'
+$mnuEventClassesSecurity.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]293,[System.Int32]24))
+$mnuEventClassesSecurity.Text = [System.String]'Security'
+$mnuEventClassesSecurity.add_Click($mnuEventClasses_click)
+#
+#UserAccountCreatedToolStripMenuItem
+#
+$UserAccountCreatedToolStripMenuItem.Checked = $true
+$UserAccountCreatedToolStripMenuItem.CheckOnClick = $true
+$UserAccountCreatedToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
+$UserAccountCreatedToolStripMenuItem.Name = [System.String]'UserAccountCreatedToolStripMenuItem'
+$UserAccountCreatedToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]388,[System.Int32]24))
+$UserAccountCreatedToolStripMenuItem.Tag = [System.String]'Security:4720'
+$UserAccountCreatedToolStripMenuItem.Text = [System.String]'4720 - User Account Created'
+#
+#UserAccountEnabledToolStripMenuItem
+#
+$UserAccountEnabledToolStripMenuItem.Checked = $true
+$UserAccountEnabledToolStripMenuItem.CheckOnClick = $true
+$UserAccountEnabledToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
+$UserAccountEnabledToolStripMenuItem.Name = [System.String]'UserAccountEnabledToolStripMenuItem'
+$UserAccountEnabledToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]388,[System.Int32]24))
+$UserAccountEnabledToolStripMenuItem.Tag = [System.String]'Security:4722'
+$UserAccountEnabledToolStripMenuItem.Text = [System.String]'4722 - User Account Enabled'
+#
+#PasswordResetAttemptToolStripMenuItem
+#
+$PasswordResetAttemptToolStripMenuItem.Checked = $true
+$PasswordResetAttemptToolStripMenuItem.CheckOnClick = $true
+$PasswordResetAttemptToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
+$PasswordResetAttemptToolStripMenuItem.Name = [System.String]'PasswordResetAttemptToolStripMenuItem'
+$PasswordResetAttemptToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]388,[System.Int32]24))
+$PasswordResetAttemptToolStripMenuItem.Tag = [System.String]'Security:4724'
+$PasswordResetAttemptToolStripMenuItem.Text = [System.String]'4724 - Password Reset Attempt'
+#
+#GroupMembershipChangesToolStripMenuItem
+#
+$GroupMembershipChangesToolStripMenuItem.Checked = $true
+$GroupMembershipChangesToolStripMenuItem.CheckOnClick = $true
+$GroupMembershipChangesToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
+$GroupMembershipChangesToolStripMenuItem.Name = [System.String]'GroupMembershipChangesToolStripMenuItem'
+$GroupMembershipChangesToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]388,[System.Int32]24))
+$GroupMembershipChangesToolStripMenuItem.Tag = [System.String]'Security:4728,4732,4756'
+$GroupMembershipChangesToolStripMenuItem.Text = [System.String]'4728/4732/4756 - Group Membership Changes'
+#
+#AccountLockoutToolStripMenuItem
+#
+$AccountLockoutToolStripMenuItem.Checked = $true
+$AccountLockoutToolStripMenuItem.CheckOnClick = $true
+$AccountLockoutToolStripMenuItem.CheckState = [System.Windows.Forms.CheckState]::Checked
+$AccountLockoutToolStripMenuItem.Name = [System.String]'AccountLockoutToolStripMenuItem'
+$AccountLockoutToolStripMenuItem.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]388,[System.Int32]24))
+$AccountLockoutToolStripMenuItem.Tag = [System.String]'Security:4720'
+$AccountLockoutToolStripMenuItem.Text = [System.String]'4740 - Account Lockout'
 #
 #frmEventFiend
 #
@@ -1379,6 +1525,12 @@ Add-Member -InputObject $frmEventFiend -Name RDSSessionHostListeningAvailability
 Add-Member -InputObject $frmEventFiend -Name RDPClientActiveXIsTryingToConnectToolStripMenuItem -Value $RDPClientActiveXIsTryingToConnectToolStripMenuItem -MemberType NoteProperty
 Add-Member -InputObject $frmEventFiend -Name RDSConnectionBrokerCommunicationToolStripMenuItem -Value $RDSConnectionBrokerCommunicationToolStripMenuItem -MemberType NoteProperty
 Add-Member -InputObject $frmEventFiend -Name FailedToStartSessionMonitoringToolStripMenuItem -Value $FailedToStartSessionMonitoringToolStripMenuItem -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name mnuEventClassesSecurity -Value $mnuEventClassesSecurity -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name UserAccountCreatedToolStripMenuItem -Value $UserAccountCreatedToolStripMenuItem -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name UserAccountEnabledToolStripMenuItem -Value $UserAccountEnabledToolStripMenuItem -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name PasswordResetAttemptToolStripMenuItem -Value $PasswordResetAttemptToolStripMenuItem -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name GroupMembershipChangesToolStripMenuItem -Value $GroupMembershipChangesToolStripMenuItem -MemberType NoteProperty
+Add-Member -InputObject $frmEventFiend -Name AccountLockoutToolStripMenuItem -Value $AccountLockoutToolStripMenuItem -MemberType NoteProperty
 Add-Member -InputObject $frmEventFiend -Name mnuEventClassesServices -Value $mnuEventClassesServices -MemberType NoteProperty
 Add-Member -InputObject $frmEventFiend -Name NewServiceInstalledToolStripMenuItem -Value $NewServiceInstalledToolStripMenuItem -MemberType NoteProperty
 Add-Member -InputObject $frmEventFiend -Name ServiceTerminatedUnexpectedlyToolStripMenuItem -Value $ServiceTerminatedUnexpectedlyToolStripMenuItem -MemberType NoteProperty
